@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
+  Modal,
   RefreshControl,
   ScrollView,
   Text,
@@ -12,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import styles from '../../../Styles/goalsStyles';
 import { useAuth } from '../../../store/auth';
 
@@ -80,6 +82,17 @@ export default function Goals() {
 
   const [newGoal, setNewGoal] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
+
+  // Estados para edición
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<GoalUI | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editTarget, setEditTarget] = useState('');
+
+  // Estados para aporte personalizado
+  const [customContributionModalVisible, setCustomContributionModalVisible] = useState(false);
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
+  const [customAmount, setCustomAmount] = useState('');
 
   // GET /api/goals
   const fetchGoals = useCallback(async () => {
@@ -189,6 +202,124 @@ export default function Goals() {
     }
   };
 
+  // Función para abrir modal de edición
+  const handleEditGoal = (goal: GoalUI) => {
+    setEditingGoal(goal);
+    setEditTitle(goal.title);
+    setEditTarget(goal.target.toString());
+    setEditModalVisible(true);
+  };
+
+  // Función para guardar cambios de edición
+  const handleSaveEdit = async () => {
+    if (!token || !editingGoal) return Alert.alert('Error', 'Sesión inválida');
+    if (!editTitle.trim()) return Alert.alert('Error', 'El título es requerido');
+    if (!editTarget.trim() || isNaN(Number(editTarget)) || Number(editTarget) <= 0) {
+      return Alert.alert('Error', 'El monto objetivo debe ser un número válido mayor a 0');
+    }
+
+    try {
+      const res = await fetch(`${GOALS_URL}/${editingGoal.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: editTitle.trim(),
+          target_amount: Number(editTarget),
+        }),
+      });
+
+      const txt = await res.text();
+      console.log('[api] PUT /goals/:id ->', res.status, txt);
+
+      if (!res.ok) {
+        let detail = txt;
+        try {
+          detail = JSON.parse(txt)?.detail ?? txt;
+        } catch {}
+        throw new Error(detail || `HTTP ${res.status}`);
+      }
+
+      setEditModalVisible(false);
+      setEditingGoal(null);
+      setEditTitle('');
+      setEditTarget('');
+      await fetchGoals();
+    } catch (e: any) {
+      Alert.alert('Error', e?.message || 'No se pudo actualizar la meta');
+    }
+  };
+
+  // Función para eliminar meta
+  const handleDeleteGoal = (goal: GoalUI) => {
+    Alert.alert(
+      'Eliminar Meta',
+      `¿Estás seguro de que deseas eliminar la meta "${goal.title}"? Esta acción no se puede deshacer.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Eliminar', 
+          style: 'destructive',
+          onPress: async () => {
+            if (!token) return Alert.alert('Error', 'Sesión inválida');
+            try {
+              const res = await fetch(`${GOALS_URL}/${goal.id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` },
+              });
+
+              const txt = await res.text();
+              console.log('[api] DELETE /goals/:id ->', res.status, txt);
+
+              if (!res.ok) {
+                let detail = txt;
+                try {
+                  detail = JSON.parse(txt)?.detail ?? txt;
+                } catch {}
+                throw new Error(detail || `HTTP ${res.status}`);
+              }
+
+              await fetchGoals();
+            } catch (e: any) {
+              Alert.alert('Error', e?.message || 'No se pudo eliminar la meta');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  // Función para abrir modal de aporte personalizado
+  const handleCustomContribution = (goalId: string) => {
+    setSelectedGoalId(goalId);
+    setCustomContributionModalVisible(true);
+  };
+
+  // Función para procesar aporte personalizado
+  const handleSaveCustomContribution = async () => {
+    if (!token || !selectedGoalId || !customAmount.trim()) {
+      Alert.alert('Error', 'Por favor ingresa una cantidad válida');
+      return;
+    }
+
+    const amount = Number(customAmount);
+    if (isNaN(amount) || amount <= 0) {
+      Alert.alert('Error', 'La cantidad debe ser un número mayor a 0');
+      return;
+    }
+
+    try {
+      await handleAddContribution(selectedGoalId, amount);
+      setCustomContributionModalVisible(false);
+      setSelectedGoalId(null);
+      setCustomAmount('');
+    } catch (e: any) {
+      Alert.alert('Error', e?.message || 'No se pudo agregar el aporte');
+    }
+  };
+
   return (
     <LinearGradient colors={['#2e3b55', '#1f2738']} style={styles.container}>
       <ScrollView 
@@ -202,7 +333,7 @@ export default function Goals() {
           />
         }
       >
-        <Text style={styles.title}>🎯 Mis Metas Financieras</Text>
+        <Text style={styles.title}>Mis Metas Financieras</Text>
         <Text style={styles.subtitle}>
           Define, visualiza y sigue el progreso de tus objetivos.
         </Text>
@@ -213,18 +344,20 @@ export default function Goals() {
           <TextInput
             style={styles.input}
             placeholder="Ej: Viaje a Europa"
+            placeholderTextColor="#999"
             value={newGoal}
             onChangeText={setNewGoal}
           />
           <TextInput
             style={styles.input}
             placeholder="Monto objetivo (CLP)"
+            placeholderTextColor="#999"
             keyboardType="numeric"
             value={targetAmount}
             onChangeText={setTargetAmount}
           />
           <TouchableOpacity style={styles.button} onPress={handleAddGoal} disabled={loading}>
-            <Text style={styles.buttonText}>➕ Agregar Meta</Text>
+            <Text style={styles.buttonText}>Empezar Meta</Text>
           </TouchableOpacity>
         </View>
 
@@ -233,7 +366,25 @@ export default function Goals() {
           const progress = goal.target > 0 ? Math.min((goal.current / goal.target) * 100, 100) : 0;
           return (
             <View key={goal.id} style={styles.card}>
-              <Text style={styles.cardTitle}>{goal.title}</Text>
+              {/* Header con título y botones de acción */}
+              <View style={styles.cardHeader}>
+                <Text style={[styles.cardTitle, { flex: 1 }]}>{goal.title}</Text>
+                <View style={styles.cardActions}>
+                  <TouchableOpacity
+                    style={[styles.actionButton, styles.editButton]}
+                    onPress={() => handleEditGoal(goal)}
+                  >
+                    <Ionicons name="pencil" size={16} color="white" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.actionButton, styles.deleteButton]}
+                    onPress={() => handleDeleteGoal(goal)}
+                  >
+                    <Ionicons name="trash" size={16} color="white" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              
               <Text style={styles.cardText}>
                 Progreso: {CLP.format(goal.current)} / {CLP.format(goal.target)} CLP
               </Text>
@@ -256,6 +407,14 @@ export default function Goals() {
                     <Text style={styles.aportButtonText}>+{CLP.format(amt)}</Text>
                   </TouchableOpacity>
                 ))}
+                {/* Botón de aporte personalizado */}
+                <TouchableOpacity
+                  style={styles.customAportButton}
+                  onPress={() => handleCustomContribution(goal.id)}
+                  disabled={loading}
+                >
+                  <Ionicons name="add" size={20} color="#fff" />
+                </TouchableOpacity>
               </View>
             </View>
           );
@@ -263,10 +422,110 @@ export default function Goals() {
 
         {!goals.length && !loading ? (
           <Text style={{ color: '#cbd5e1', textAlign: 'center', marginTop: 16 }}>
-            Aún no tienes metas. Crea tu primera. ✨
+            ¡Crea tu primera meta para empezar! ✨
           </Text>
         ) : null}
       </ScrollView>
+
+      {/* Modal de edición */}
+      <Modal
+        visible={editModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Editar Meta</Text>
+            
+            <Text style={styles.inputLabel}>Nombre de la meta</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ej: Viaje a Europa"
+              placeholderTextColor="#999"
+              value={editTitle}
+              onChangeText={setEditTitle}
+            />
+            
+            <Text style={styles.inputLabel}>Monto objetivo</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Monto objetivo (CLP)"
+              placeholderTextColor="#999"
+              keyboardType="numeric"
+              value={editTarget}
+              onChangeText={setEditTarget}
+            />
+            
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setEditModalVisible(false)}
+              >
+                <Text style={styles.modalButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
+                onPress={handleSaveEdit}
+                disabled={loading}
+              >
+                <Text style={styles.modalButtonText}>Guardar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de aporte personalizado */}
+      <Modal
+        visible={customContributionModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => {
+          setCustomContributionModalVisible(false);
+          setSelectedGoalId(null);
+          setCustomAmount('');
+        }}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Aporte Personalizado</Text>
+            
+            <Text style={styles.inputLabel}>Cantidad a aportar</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ej: 15000"
+              placeholderTextColor="#999"
+              value={customAmount}
+              onChangeText={setCustomAmount}
+              keyboardType="numeric"
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => {
+                  setCustomContributionModalVisible(false);
+                  setSelectedGoalId(null);
+                  setCustomAmount('');
+                }}
+              >
+                <Text style={styles.modalButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
+                onPress={handleSaveCustomContribution}
+                disabled={loading}
+              >
+                <Text style={styles.modalButtonText}>Agregar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
     </LinearGradient>
   );
 }

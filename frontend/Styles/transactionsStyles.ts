@@ -2,27 +2,27 @@
 import { Platform, StyleSheet } from 'react-native';
 
 export const C = {
-  // Base clara y suave
-  bg1: '#F5F7FA',
-  bg2: '#FFFFFF',
-  card: '#FFFFFF',
-  border: '#E2E8F0',
+  // Base oscura
+  bg1: '#2f3b52',
+  bg2: '#1f2738',
+  card: '#1f2738', 
+  border: 'rgba(255,255,255,0.14)',
 
   // Texto
-  text: '#0F172A',
-  textDim: '#475569',
-  muted: '#64748B',
+  text: '#F8FAFC',
+  textDim: '#CBD5E1',
+  muted: '#94a3b8',
 
   // Marca
   primary: '#2563EB',
-  primarySoft: '#EAF2FF',
+  primarySoft: 'rgba(37,99,235,0.12)',
 
   // KPIs
-  kpiLabel: '#64748B',
-  kpiValue: '#0F172A',
+  kpiLabel: '#CBD5E1',
+  kpiValue: '#F8FAFC',
 
   // Ingresos / Gastos
-  income: '#16A34A',
+  income: '#049c3cff',
   incomeBg: 'rgba(22,163,74,0.12)',
   expense: '#DC2626',
   expenseBg: 'rgba(220,38,38,0.12)',
@@ -32,13 +32,28 @@ export const C = {
   actionText: '#FFFFFF',
 
   // Inputs
-  inputBg: '#F8FAFC',
-  inputBorder: '#E2E8F0',
+  inputBg: 'rgba(255,255,255,0.08)',
+  inputBorder: 'rgba(255,255,255,0.14)',
   inputFocus: '#2563EB',
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 14, paddingTop: 12 },
+  container: {
+    flex: 1,
+    paddingHorizontal: 14,
+    paddingTop: Platform.OS === 'ios' ? 0 : 12,
+    marginTop: Platform.OS === 'ios' ? -45 : 0,
+    backgroundColor: C.bg1, // Fondo oscuro
+  },
+  
+  mainTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    textAlign: 'center',
+    marginBottom: 16,
+    marginTop: 8,
+  },
 
   header: {
     flexDirection: 'row',
@@ -70,7 +85,11 @@ const styles = StyleSheet.create({
   kpiLabel: { color: C.kpiLabel, fontSize: 12 },
   kpiValue: { color: C.kpiValue, fontWeight: '800', marginTop: 2 },
 
-  list: { flex: 1, marginTop: 6 },
+  list: { 
+    flex: 1, 
+    marginTop: 6,
+    paddingBottom: 160, 
+  },
   emptyText: {
     textAlign: 'center',
     color: C.muted,
@@ -98,7 +117,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 14,
     right: 14,
-    bottom: 14,
+    bottom: -20,
     backgroundColor: C.card,
     borderRadius: 16,
     padding: 14,

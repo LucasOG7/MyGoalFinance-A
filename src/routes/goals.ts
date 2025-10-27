@@ -130,6 +130,35 @@ router.patch('/:id', requireAuth, async (req: any, res) => {
 });
 
 // ─────────────────────────────────────────────
+// Actualizar meta (PUT - igual que PATCH para compatibilidad)
+// ─────────────────────────────────────────────
+router.put('/:id', requireAuth, async (req: any, res) => {
+  const id = Number(req.params.id);
+  const userId = await getProfileIdByAuthId(req.user.id);
+  if (!userId) return res.status(404).json({ detail: 'Perfil no encontrado' });
+
+  const parsed = updateSchema.safeParse(req.body);
+  if (!parsed.success) {
+    console.error('[goals] zod error (update)', parsed.error.flatten());
+    return res.status(400).json(parsed.error.flatten());
+  }
+
+  const { data, error } = await supabase
+    .from('financial_goal')
+    .update(parsed.data)
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('[goals] update error', { id, body: parsed.data, error });
+    return res.status(400).json({ detail: error.message });
+  }
+  res.json(data);
+});
+
+// ─────────────────────────────────────────────
 // Aportar a una meta (intenta RPC, sino fallback)
 // ─────────────────────────────────────────────
 router.post('/:id/contribute', requireAuth, async (req: any, res) => {

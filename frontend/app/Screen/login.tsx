@@ -16,6 +16,7 @@ export default function Login() {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const onSubmit = async () => {
@@ -146,16 +147,26 @@ export default function Login() {
               returnKeyType="next"
             />
 
-            <TextInput
-              style={styles.input}
-              placeholder={t('login.passwordPlaceholder')}
-              placeholderTextColor="#9aa3b2"
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-              returnKeyType="done"
-              onSubmitEditing={onSubmit}
-            />
+            {/* Contraseña (con ojo) */}
+            <View style={{ position: 'relative' }}>
+              <TextInput
+                style={[styles.input, { paddingRight: 44 }]}
+                placeholder={t('login.passwordPlaceholder')}
+                placeholderTextColor="#9aa3b2"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+                returnKeyType="done"
+                onSubmitEditing={onSubmit}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword((v) => !v)}
+                style={{ position: 'absolute', right: 10, top: 12, padding: 6 }}
+                hitSlop={10}
+              >
+                <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={22} color="#64748b" />
+              </TouchableOpacity>
+            </View>
 
             <TouchableOpacity
               style={[styles.loginButton, busy && { opacity: 0.7 }]}

@@ -22,8 +22,10 @@ const ymdLocal = (d = new Date()) => {
   return `${y}-${m}-${day}`;
 };
 const ymOf = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-const monthTitle = (d: Date) =>
-  d.toLocaleDateString('es-CL', { year: 'numeric', month: 'long' });
+const monthTitle = (d: Date) => {
+  const title = d.toLocaleDateString('es-CL', { year: 'numeric', month: 'long' });
+  return title.charAt(0).toUpperCase() + title.slice(1);
+};
 
 export default function Transactions() {
   // Mes "canónico" siempre día 1
@@ -102,8 +104,11 @@ export default function Transactions() {
   };
 
   return (
-    <SafeKeyboardScreen withTabBarPadding={true} bg={C.bg1}>
+    <SafeKeyboardScreen withTabBarPadding={true} bg={C.bg1} paddingTop={0}>
       <View style={[styles.container, { backgroundColor: C.bg1 }]}>
+      {/* Título principal */}
+      <Text style={styles.mainTitle}>Transacciones</Text>
+      
       {/* Header navegación por mes */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.navBtn} onPress={prevMonth}>
@@ -148,7 +153,7 @@ export default function Transactions() {
         <FlatList
           data={list}
           keyExtractor={(t) => String(t.id)}
-          contentContainerStyle={{ paddingBottom: 180 }}
+          contentContainerStyle={{ paddingBottom: 230 }}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}

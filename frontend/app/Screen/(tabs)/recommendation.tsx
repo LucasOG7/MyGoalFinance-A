@@ -6,6 +6,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
   RefreshControl,
   Text,
   TouchableOpacity,
@@ -170,7 +171,11 @@ export default function Recommendation() {
   const showSpinner = loadingUser || loadingRecs;
 
   return (
-    <SafeKeyboardScreen withTabBarPadding={true} bg="#2e3b55">
+    <SafeKeyboardScreen 
+      withTabBarPadding={true} 
+      bg="#2e3b55"
+      extraBottomPad={Platform.OS === 'ios' ? -40 : 0}
+    >
       <LinearGradient colors={["#2e3b55", "#1f2738"]} style={{ flex: 1 }}>
         <View style={{ padding: 20, flex: 1 }}>
           <Text style={{ fontSize: 24, fontWeight: "800", color: "#fff", textAlign: "center" }}>
@@ -272,7 +277,7 @@ export default function Recommendation() {
           </>
         )}
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => router.replace("/Screen/(tabs)/home")}
           style={{
             backgroundColor: "#ffa000",
@@ -282,8 +287,8 @@ export default function Recommendation() {
             marginTop: 16,
           }}
         >
-          <Text style={{ color: "#fff", fontWeight: "700" }}>⬅ Volver al Home</Text>
-        </TouchableOpacity>
+          <Text style={{ color: "#fff", fontWeight: "700" }}>Volver al Inicio</Text>
+        </TouchableOpacity> */}
       </View>
       </LinearGradient>
     </SafeKeyboardScreen>

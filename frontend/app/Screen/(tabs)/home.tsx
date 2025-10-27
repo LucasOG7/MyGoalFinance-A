@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -15,7 +16,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import api from '../../../constants/api';
 
 type SummaryMonth = {
@@ -40,6 +41,7 @@ function mapGoalUI(g: any): GoalUI {
 
 export default function Home() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [busy, setBusy] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'1D' | '1M' | '12M'>('1M');
@@ -99,7 +101,7 @@ export default function Home() {
   }, [load]);
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={styles.safe} edges={['left', 'right']}>
       <StatusBar style="light" />
       {/* Header */}
       <LinearGradient colors={['#2e3b55', '#1f2738']} style={styles.header}>
@@ -110,7 +112,7 @@ export default function Home() {
             <Text style={styles.subtitle}>Tu panel de control financiero</Text>
           </View>
           {/* Profile Picture */}
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => router.push('/Screen/profile')}
             style={styles.profileButton}
           >
@@ -125,9 +127,21 @@ export default function Home() {
       {/* Content */}
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: Platform.OS === 'ios' ? insets.bottom + 40 : 16 }
+        ]}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
+
+      {/* Acciones rápidas */}
+      <Text style={styles.sectionTitle}>Acciones rápidas</Text>
+      <View style={styles.quickRow}>
+        <QuickButton label="Añadir mov." icon="add-circle" onPress={() => router.push('/Screen/(tabs)/transactions')} />
+        <QuickButton label="Chatbot" icon="chatbubble-ellipses" onPress={() => router.push('/Screen/(tabs)/chatbot')} />
+        <QuickButton label="Metas" icon="flag" onPress={() => router.push('/Screen/(tabs)/goals')} />
+      </View>
+
         {/* Dashboard Principal - Total Ingresos */}
         <View style={styles.dashboardCard}>
           <Text style={styles.dashboardLabel}>Total Ingresos</Text>
@@ -135,7 +149,7 @@ export default function Home() {
           <View style={styles.dashboardIcon}>
             <Ionicons name="link" size={20} color="#666" />
           </View>
-          
+
           {/* Period Selector */}
           <View style={styles.periodSelector}>
             {(['1D', '1M', '12M'] as const).map((period) => (
@@ -158,30 +172,23 @@ export default function Home() {
           </View>
         </View>
 
+      {/* {Rates} */}
+      <View style={styles.row}>
+        <RateCard title="Dólar (USD)" value={rates?.usd} hint="1 CLP → USD" />
+        <RateCard title="Euro (EUR)" value={rates?.eur} hint="1 CLP → EUR" />
+        <RateCard title="UF" value={rates?.uf} hint={rates ? `Act: ${new Date(rates.updatedAt).toLocaleDateString()}` : ''} />
+      </View>
+
         {/* KPIs */}
         <View style={styles.row}>
-          <KpiCard label="Ingresos" value={sum?.inc ?? 0} color="#26c281" icon="arrow-down-circle" />
-          <KpiCard label="Gastos" value={sum?.exp ?? 0} color="#ff5a5f" icon="arrow-up-circle" />
+          <KpiCard label="Ingresos" value={sum?.inc ?? 0} color="#26c281" icon="arrow-up-circle" />
+          <KpiCard label="Gastos" value={sum?.exp ?? 0} color="#ff5a5f" icon="arrow-down-circle" />
           <KpiCard label="Neto" value={sum?.net ?? 0} color="#4dabf7" icon="wallet" />
         </View>
 
-        {/* Rates
-        <View style={styles.row}>
-          <RateCard title="Dólar (USD)" value={rates?.usd} hint="1 CLP → USD" />
-          <RateCard title="Euro (EUR)" value={rates?.eur} hint="1 CLP → EUR" />
-          <RateCard title="UF" value={rates?.uf} hint={rates ? `Act: ${new Date(rates.updatedAt).toLocaleDateString()}` : ''} />
-        </View> */}
-
-        {/* Quick actions */}
-        <View style={styles.quickRow}>
-          <QuickButton label="Añadir mov." icon="add-circle" onPress={() => router.push('/Screen/(tabs)/transactions')} />
-          <QuickButton label="Chatbot" icon="chatbubble-ellipses" onPress={() => router.push('/Screen/(tabs)/chatbot')} />
-          <QuickButton label="Metas" icon="flag" onPress={() => router.push('/Screen/(tabs)/goals')} />
-        </View>
-
-        {/* Goals preview – AHORA CON PROGRESO */}
+        {/* Goals preview */}
         <Section
-          title="Tus metas"
+          title="Tus metas activas"
           actionLabel="Ver metas"
           onAction={() => router.push('/Screen/(tabs)/goals')}
         >
@@ -247,7 +254,13 @@ function RateCard({ title, value, hint }: { title: string; value?: number | null
 
 function QuickButton({ label, icon, onPress }: { label: string; icon: keyof typeof Ionicons.glyphMap; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} style={styles.quickBtn}>
+    <Pressable 
+      onPress={onPress} 
+      style={({ pressed }) => [
+        styles.quickBtn,
+        pressed && { transform: [{ scale: 0.95 }], opacity: 0.8 }
+      ]}
+    >
       <Ionicons name={icon} size={22} color="#1f2738" />
       <Text style={styles.quickTxt}>{label}</Text>
     </Pressable>

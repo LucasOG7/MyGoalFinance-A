@@ -84,7 +84,7 @@ export default function SafeKeyboardScreen({
   );
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: bg }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: bg }}>
       {Platform.OS === 'web' ? (
         // 🚫 En web no usamos KAV para evitar pérdidas de foco
         Inner

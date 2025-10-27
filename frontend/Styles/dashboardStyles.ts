@@ -47,6 +47,16 @@ const styles = StyleSheet.create({
     backgroundColor: palette.bg,
   },
 
+  /* ---------- Título Dashboard ---------- */
+  dashboardTitle: {
+    color: palette.textPrimary,
+    fontSize: 24,
+    fontWeight: '900',
+    textAlign: 'center',
+    marginBottom: 16,
+    letterSpacing: 0.5,
+  },
+
   /* ---------- Header ---------- */
   header: {
     flexDirection: 'row',

@@ -101,9 +101,9 @@ export default function EditProfile() {
 
       {/* Card */}
       <View style={editprofileStyles.card}>
-        <Text style={editprofileStyles.title}>✏️ Editar Perfil</Text>
+        <Text style={editprofileStyles.title}>Editar Perfil</Text>
 
-        <Text style={editprofileStyles.label}>🎂 Edad</Text>
+        <Text style={editprofileStyles.label}>Edad</Text>
         <TextInput
           placeholder="18"
           keyboardType="numeric"
@@ -116,7 +116,7 @@ export default function EditProfile() {
           editable={!busy}
         />
 
-        <Text style={editprofileStyles.label}>📊 Nivel en Finanzas</Text>
+        <Text style={editprofileStyles.label}>Nivel en Finanzas</Text>
         <TextInput
           ref={levelRef}
           placeholder="Básico / Intermedio / Avanzado"
@@ -130,7 +130,7 @@ export default function EditProfile() {
           editable={!busy}
         />
 
-        <Text style={editprofileStyles.label}>💰 Ingresos (CLP)</Text>
+        <Text style={editprofileStyles.label}>Ingresos Mensuales (CLP)</Text>
         <TextInput
           ref={incomeRef}
           placeholder="500000"
@@ -144,7 +144,7 @@ export default function EditProfile() {
           editable={!busy}
         />
 
-        <Text style={editprofileStyles.label}>🎯 Meta Financiera</Text>
+        <Text style={editprofileStyles.label}>Meta Financiera</Text>
         <TextInput
           ref={goalRef}
           placeholder="Ahorrar / Pagar deudas..."
@@ -164,7 +164,7 @@ export default function EditProfile() {
           {busy ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={editprofileStyles.buttonText}>💾 Guardar Cambios</Text>
+            <Text style={editprofileStyles.buttonText}>Guardar Cambios</Text>
           )}
         </TouchableOpacity>
 

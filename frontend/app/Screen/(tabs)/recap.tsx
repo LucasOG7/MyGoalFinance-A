@@ -139,7 +139,7 @@ export default function RecapScreen() {
   };
 
   return (
-    <SafeAreaView style={sx.safe} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={sx.safe} edges={['left', 'right']}>
       {/* Header con la paleta del Home */}
       <LinearGradient colors={['#2e3b55', '#1f2738']} style={sx.header}>
         <Text style={sx.h1}>Resumen de tu Perfil</Text>
@@ -272,7 +272,13 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 
 function Tile({ title, onPress }: { title: string; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} style={sx.tile}>
+    <Pressable 
+      onPress={onPress} 
+      style={({ pressed }) => [
+        sx.tile,
+        pressed && { transform: [{ scale: 0.95 }], opacity: 0.8 }
+      ]}
+    >
       <Text style={sx.tileTxt}>{title}</Text>
     </Pressable>
   );
@@ -281,7 +287,7 @@ function Tile({ title, onPress }: { title: string; onPress: () => void }) {
 /* ---------- Estilos (paleta del Home) ---------- */
 
 const sx = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0f172a' },
+  safe: { flex: 1, backgroundColor: '#0f172a', paddingTop: 0 },
   header: {
     paddingHorizontal: 16,
     paddingTop: 16,
@@ -369,16 +375,22 @@ const sx = StyleSheet.create({
   },
   tile: {
     flex: 1,
-    backgroundColor: '#0b1324',
+    backgroundColor: '#f59e0b',
     borderRadius: 12,
-    padding: 14,
+    padding: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#f59e0b',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   tileTxt: {
-    color: '#e5e7eb',
-    fontWeight: '700',
+    color: '#1f2738',
+    fontWeight: '800',
     textAlign: 'center',
+    fontSize: 14,
   },
 
   disclaimer: {

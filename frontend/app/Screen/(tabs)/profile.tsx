@@ -109,7 +109,7 @@ export default function Profile() {
         onPress={() => router.push("/Screen/editprofile")}
         disabled={busy}
       >
-        <Text style={styles.buttonText}>✏️ Editar Perfil</Text>
+        <Text style={styles.buttonText}>Editar Perfil</Text>
       </TouchableOpacity>
 
       {/* Cerrar sesión */}
@@ -121,7 +121,7 @@ export default function Profile() {
         {busy ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>🚪 Cerrar sesión</Text>
+          <Text style={styles.buttonText}>Cerrar sesión</Text>
         )}
       </TouchableOpacity>
 
@@ -131,7 +131,7 @@ export default function Profile() {
         onPress={() => router.replace("/Screen/(tabs)/home")}
         disabled={busy}
       >
-        <Text style={styles.linkText}>⬅ Volver al Home</Text>
+        <Text style={styles.linkText}>Volver al Inicio</Text>
       </TouchableOpacity>
     </LinearGradient>
   );

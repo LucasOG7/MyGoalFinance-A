@@ -3,11 +3,13 @@ import {
   ActivityIndicator,
   FlatList,
   Linking,
+  Platform,
   RefreshControl,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styles from '../../../Styles/newsStyles';
 import api from '../../../constants/api';
 
@@ -47,6 +49,7 @@ const formatDate = (iso?: string | null) => {
 };
 
 export default function NewsScreen() {
+  const insets = useSafeAreaInsets();
   const [rates, setRates] = useState<Rates | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,7 +81,7 @@ export default function NewsScreen() {
   const Header = () => (
     <View>
       <Text style={styles.headerTitle}>Mercados & Noticias</Text>
-      <Text style={styles.sectionTitle}>Cambio de divisas</Text>
+      <Text style={styles.sectionTitle}>Valor actual de divisas</Text>
       <View style={styles.rateRow}>
         <View style={styles.rateCard}>
           <Text style={styles.rateLabel}>Dólar (USD)</Text>
@@ -160,7 +163,14 @@ export default function NewsScreen() {
             No hay noticias por ahora.
           </Text>
         }
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[
+          styles.listContent,
+          {
+            paddingBottom: Platform.OS === 'ios' 
+              ? insets.bottom + 70 
+              : 60
+          }
+        ]}
       />
     </View>
   );

@@ -5,6 +5,7 @@ const goalsStyles = StyleSheet.create({
   },
   content: {
     padding: 20,
+    paddingBottom: 100,
   },
   backButton: {
     alignSelf: "flex-start",
@@ -59,6 +60,8 @@ const goalsStyles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     marginBottom: 10,
+    color: "#333",
+    fontSize: 16,
   },
   button: {
     backgroundColor: "#ff9800",
@@ -90,6 +93,8 @@ const goalsStyles = StyleSheet.create({
   aportContainer: {
     flexDirection: "row",
     marginTop: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
   aportButton: {
     backgroundColor: "#312d69",
@@ -101,6 +106,96 @@ const goalsStyles = StyleSheet.create({
     color: "white",
     fontWeight: "600",
     fontSize: 14,
+  },
+  customAportButton: {
+    backgroundColor: "#ff9800",
+    padding: 8,
+    borderRadius: 8,
+    marginRight: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    minWidth: 40,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 10,
+  },
+  cardActions: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  actionButton: {
+    padding: 6,
+    borderRadius: 6,
+    backgroundColor: "#f0f0f0",
+  },
+  editButton: {
+    backgroundColor: "#4caf50",
+  },
+  deleteButton: {
+    backgroundColor: "#f44336",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 25,
+    width: "100%",
+    maxWidth: 380,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#312d69",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#312d69",
+    marginBottom: 8,
+    marginTop: 5,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+    gap: 15,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  cancelButton: {
+    backgroundColor: "#f44336",
+  },
+  saveButton: {
+    backgroundColor: "#4caf50",
+  },
+  modalButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 15,
   },
 });
 

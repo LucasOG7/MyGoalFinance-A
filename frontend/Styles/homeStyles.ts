@@ -1,12 +1,12 @@
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#141a26' },
-  header: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 20 },
+  safe: { flex: 1, backgroundColor: '#141a26', paddingTop: 0 },
+  header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16 },
   headerContent: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
-    alignItems: 'flex-start' 
+    alignItems: 'flex-start'
   },
   brand: { color: '#e8edf7', fontWeight: '700', fontSize: 18, marginBottom: 6 },
   h1: { color: 'white', fontSize: 28, fontWeight: '800' },
@@ -29,7 +29,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#1f2738',
     borderRadius: 16,
     padding: 20,
-    marginBottom: 16,
     position: 'relative',
   },
   dashboardLabel: {
@@ -83,7 +82,7 @@ const styles = StyleSheet.create({
   },
 
   scroll: { flex: 1 },
-  content: { padding: 16, gap: 16 },
+  content: { padding: 16, paddingTop: 8, gap: 16 },
 
   row: { flexDirection: 'row', gap: 12 },
   kpi: {
@@ -104,14 +103,24 @@ const styles = StyleSheet.create({
   quickRow: { flexDirection: 'row', gap: 12 },
   quickBtn: {
     flex: 1,
-    backgroundColor: '#f3b34c',
-    borderRadius: 14,
-    paddingVertical: 14,
+    backgroundColor: '#f59e0b',
+    borderRadius: 12,
+    padding: 16,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
+    shadowColor: '#f59e0b',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  quickTxt: { color: '#1f2738', fontWeight: '800' },
+  quickTxt: { 
+    color: '#1f2738', 
+    fontWeight: '800',
+    fontSize: 14,
+    textAlign: 'center',
+  },
 
   section: { gap: 10 },
   sectionTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

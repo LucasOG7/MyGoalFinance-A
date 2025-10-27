@@ -61,7 +61,14 @@ export default function Chatbot() {
     })();
     return () => {
       cancel = true;
-      esRef.current?.close?.();
+      if (esRef.current) {
+        try {
+          esRef.current.close();
+        } catch (error) {
+          // Silently handle any errors during cleanup
+        }
+        esRef.current = null;
+      }
     };
   }, []);
 
@@ -83,7 +90,14 @@ export default function Chatbot() {
     );
 
     // cierra stream previo si hubiese
-    esRef.current?.close?.();
+    if (esRef.current) {
+      try {
+        esRef.current.close();
+      } catch (error) {
+        // Silently handle any errors during cleanup
+      }
+      esRef.current = null;
+    }
 
     // ————— Fallback REST por si el stream no existe o falla —————
     const sendViaRestFallback = async () => {
@@ -141,7 +155,9 @@ export default function Chatbot() {
         if (!gotAnyDelta && !finished) {
           try {
             es.close();
-          } catch {}
+          } catch (error) {
+            // Silently handle any errors during cleanup
+          }
           sendViaRestFallback();
         }
       }, 4000);
@@ -178,7 +194,11 @@ export default function Chatbot() {
         requestAnimationFrame(() =>
           listRef.current?.scrollToEnd({ animated: true })
         );
-        es.close();
+        try {
+          es.close();
+        } catch (error) {
+          // Silently handle any errors during cleanup
+        }
         esRef.current = null;
         setSending(false);
       });
@@ -189,7 +209,9 @@ export default function Chatbot() {
         clearTimeout(startupTimeout);
         try {
           es.close();
-        } catch {}
+        } catch (error) {
+          // Silently handle any errors during cleanup
+        }
         // Si no llegó nada del stream -> REST
         if (!gotAnyDelta) {
           sendViaRestFallback();
@@ -232,8 +254,8 @@ export default function Chatbot() {
 
   return (
     <SafeAreaView
-      edges={['top', 'bottom']}
-      style={{ flex: 1, backgroundColor: '#1f2738' }}
+      edges={[]}
+      style={{ flex: 1, backgroundColor: '#1f2738', paddingTop: 0 }}
     >
       {/* Header */}
       <LinearGradient colors={['#2b344a', '#1f2738']} style={styles.container}>
@@ -261,6 +283,11 @@ export default function Chatbot() {
                 <ActivityIndicator />
                 <Text style={styles.hint}>Cargando conversación…</Text>
               </View>
+            ) : messages.length === 0 ? (
+              // Mostrar texto flotante cuando no hay mensajes
+              <View style={styles.centerFill}>
+                <Text style={styles.welcomeText}>¿Qué quieres aprender hoy?</Text>
+              </View>
             ) : (
               <FlatList
                 ref={listRef}
@@ -279,7 +306,11 @@ export default function Chatbot() {
                   {
                     // deja sitio para la barra de input
                     paddingBottom:
-                      insets.bottom + Math.min(120, Math.max(44, inputHeight)) + 12,
+                      Platform.OS === 'ios' 
+                        ? insets.bottom + Math.min(120, Math.max(48, inputHeight)) + 20
+                        : Platform.OS === 'android'
+                          ? Math.min(120, Math.max(48, inputHeight)) + 80
+                          : Math.min(120, Math.max(48, inputHeight)) + 80,
                   },
                 ]}
                 ListFooterComponent={
@@ -309,11 +340,21 @@ export default function Chatbot() {
           </View>
 
           {/* Barra de entrada SIEMPRE ABAJO */}
-          <View style={[styles.inputBar, { paddingBottom: insets.bottom + 8 }]}>
+          <View style={[
+            styles.inputBar, 
+            { 
+              paddingBottom: Platform.OS === 'ios' 
+                ? insets.bottom + 70
+                : Platform.OS === 'android' 
+                  ? 16 
+                  : 12,
+              marginBottom: Platform.OS === 'web' ? 60 : 0
+            }
+          ]}>
             <TextInput
               style={[
                 styles.input,
-                { height: Math.min(120, Math.max(44, inputHeight)) },
+                { height: Math.min(120, Math.max(48, inputHeight)) },
               ]}
               placeholder="Escribe tu consulta…"
               placeholderTextColor="#95a0b5"

@@ -50,7 +50,9 @@ const nextYM = (ym: string, delta: number) => {
 const ymToTitle = (ym: string) => {
   const [y, m] = ym.split('-').map(Number);
   const d = new Date(y, m - 1, 1);
-  return d.toLocaleString('es-CL', { month: 'long', year: 'numeric' });
+  const monthYear = d.toLocaleString('es-CL', { month: 'long', year: 'numeric' });
+  // Capitalizar la primera letra del mes
+  return monthYear.charAt(0).toUpperCase() + monthYear.slice(1);
 };
 const daysInMonth = (ym: string) => {
   const [y, m] = ym.split('-').map(Number);
@@ -213,7 +215,7 @@ export default function Dashboard() {
   return (
     <ScrollView 
       style={styles.container} 
-      contentContainerStyle={{ paddingBottom: 80 }}
+      contentContainerStyle={{ paddingBottom: 110 }}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -223,6 +225,9 @@ export default function Dashboard() {
         />
       }
     >
+      {/* Título Dashboard */}
+      <Text style={styles.dashboardTitle}>Dashboard</Text>
+      
       {/* Header con mes */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.navBtn} onPress={() => setMonth((m) => nextYM(m, -1))}>
