@@ -24,6 +24,24 @@ const styles = StyleSheet.create({
     marginVertical: 20, // Espacio vertical para mejor centrado
   },
 
+  // Header con botón de regreso
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginBottom: 10,
+    paddingBottom: 10,
+  },
+
+  // Botón de regreso
+  backButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: "#f5a623",
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
   title: {
     fontSize: 26,
     fontWeight: "bold",

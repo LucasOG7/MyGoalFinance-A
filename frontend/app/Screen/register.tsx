@@ -12,13 +12,16 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import SafeKeyboardScreen from '../../components/ui/SafeKeyboardScreen';
 import { useAuth } from '../../store/auth';
 import styles from '../../Styles/registerStyles';
+import LanguageSelector from '../../components/LanguageSelector';
 
 export default function Register() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   const { register: registerUser, login, setPendingCreds } = useAuth();
 
@@ -41,14 +44,14 @@ export default function Register() {
 
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!name.trim()) e.name = 'Debe ingresar su nombre';
-    if (!email.trim()) e.email = 'Debe ingresar su correo';
-    else if (!emailRegex.test(email)) e.email = 'Correo inválido';
-    if (!password.trim()) e.password = 'Debe ingresar una contraseña';
+    if (!name.trim()) e.name = t('register.errorName');
+    if (!email.trim()) e.email = t('register.errorEmail');
+    else if (!emailRegex.test(email)) e.email = t('register.errorEmailInvalid');
+    if (!password.trim()) e.password = t('register.errorPassword');
     else if (!passwordRegex.test(password))
-      e.password = 'Mín 8, 1 mayúscula y 1 carácter especial';
-    if (!confirmPassword.trim()) e.confirmPassword = 'Debe confirmar la contraseña';
-    else if (password !== confirmPassword) e.confirmPassword = 'Las contraseñas no coinciden';
+      e.password = t('register.errorPasswordWeak');
+    if (!confirmPassword.trim()) e.confirmPassword = t('register.errorConfirmPassword');
+    else if (password !== confirmPassword) e.confirmPassword = t('register.errorPasswordMismatch');
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -68,7 +71,7 @@ export default function Register() {
       await login(email.trim(), password);
       router.replace('/Screen/questionnaire/step1');
     } catch (e: any) {
-      Alert.alert('Error', e?.message ?? 'No se pudo registrar');
+      Alert.alert(t('register.alertError'), e?.message ?? t('register.alertRegisterFailed'));
     } finally {
       setBusy(false);
     }
@@ -84,6 +87,9 @@ export default function Register() {
       extraBottomPad={16}
       withTabBarPadding={false}
     >
+      {/* Language Selector - positioned like in login */}
+      <LanguageSelector />
+      
       {/* Degradado como en Home: ocupa TODO el ancho */}
       <LinearGradient
         colors={['#1a2644', '#0f172a']}
@@ -111,18 +117,25 @@ export default function Register() {
         }}
       >
         <View style={[styles.box, { width: '100%', maxWidth: 380, alignSelf: 'center' }]}>
-          {/* Ícono financiero centrado */}
+          {/* Header con botón de regreso */}
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Ícono */}
           <View style={{ alignItems: 'center', marginBottom: 20 }}>
             <Ionicons name="wallet" size={60} color="#f5a623" />
           </View>
           
-          <Text style={styles.title}>Crear cuenta</Text>
-          <Text style={styles.subtitle}>Únete a MyGoalFinance</Text>
+          <Text style={styles.title}>{t('register.title')}</Text>
+          <Text style={styles.subtitle}>{t('register.subtitle')}</Text>
 
           {/* Nombre */}
           <TextInput
             style={[styles.input, errors.name && styles.inputError]}
-            placeholder="Usuario"
+            placeholder={t('register.namePlaceholder')}
             placeholderTextColor="#9aa3b2"
             value={name}
             onChangeText={setName}
@@ -136,7 +149,7 @@ export default function Register() {
           <TextInput
             ref={emailRef}
             style={[styles.input, errors.email && styles.inputError]}
-            placeholder="Correo electrónico"
+            placeholder={t('register.emailPlaceholder')}
             placeholderTextColor="#9aa3b2"
             keyboardType="email-address"
             autoCapitalize="none"
@@ -149,12 +162,12 @@ export default function Register() {
           />
           {!!errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
-          {/* Contraseña (con ojo) */}
+          {/* Contraseña con mostrar/ocultar */}
           <View style={{ position: 'relative' }}>
             <TextInput
               ref={passRef}
               style={[styles.input, errors.password && styles.inputError, { paddingRight: 44 }]}
-              placeholder="Contraseña (Ej: MiClave!2024)"
+              placeholder={t('register.passwordPlaceholder')}
               placeholderTextColor="#9aa3b2"
               secureTextEntry={!showPass}
               value={password}
@@ -173,12 +186,12 @@ export default function Register() {
           </View>
           {!!errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
 
-          {/* Confirmar contraseña (con ojo) */}
+          {/* Confirmar contraseña con mostrar/ocultar */}
           <View style={{ position: 'relative' }}>
             <TextInput
               ref={confirmRef}
               style={[styles.input, errors.confirmPassword && styles.inputError, { paddingRight: 44 }]}
-              placeholder="Repite la contraseña"
+              placeholder={t('register.confirmPasswordPlaceholder')}
               placeholderTextColor="#9aa3b2"
               secureTextEntry={!showPass2}
               value={confirmPassword}
@@ -204,7 +217,7 @@ export default function Register() {
             onPress={handleRegister}
             disabled={busy}
           >
-            {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.registerButtonText}>Registrarse</Text>}
+            {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.registerButtonText}>{t('register.registerButton')}</Text>}
           </TouchableOpacity>
 
           {/* Volver al login */}
@@ -213,7 +226,7 @@ export default function Register() {
             onPress={() => router.replace('/Screen/login')}
             disabled={busy}
           >
-            <Text style={styles.loginButtonText}>¿Ya tienes cuenta? Inicia sesión</Text>
+            <Text style={styles.loginButtonText}>{t('register.loginLink')}</Text>
           </TouchableOpacity>
         </View>
       </View>

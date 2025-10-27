@@ -142,9 +142,8 @@ export default function RecapScreen() {
     <SafeAreaView style={sx.safe} edges={['top', 'left', 'right']}>
       {/* Header con la paleta del Home */}
       <LinearGradient colors={['#2e3b55', '#1f2738']} style={sx.header}>
-        <Text style={sx.brand}>MyGoalFinance</Text>
         <Text style={sx.h1}>Resumen de tu Perfil</Text>
-        <Text style={sx.subtitle}>¡Hola, {firstName}! Aquí va tu snapshot personal</Text>
+        <Text style={sx.subtitle}>{firstName}, aquí va tu snapshot personal</Text>
       </LinearGradient>
 
       <ScrollView

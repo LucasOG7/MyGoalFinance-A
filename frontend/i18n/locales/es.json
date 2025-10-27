@@ -1,0 +1,71 @@
+{
+  "login": {
+    "title": "MyGoalFinance",
+    "subtitle": "Tu futuro financiero comienza aquí",
+    "emailPlaceholder": "Correo electrónico",
+    "passwordPlaceholder": "Contraseña",
+    "loginButton": "Iniciar Sesión",
+    "registerLink": "¿No tienes cuenta? Regístrate",
+    "alertAttention": "Atención",
+    "alertEnterCredentials": "Ingresa tu correo y contraseña",
+    "alertError": "Error",
+    "alertLoginFailed": "No se pudo iniciar sesión"
+  },
+  "register": {
+    "title": "Crear Cuenta",
+    "subtitle": "Únete a MyGoalFinance",
+    "namePlaceholder": "Nombre completo",
+    "emailPlaceholder": "Correo electrónico",
+    "passwordPlaceholder": "Contraseña",
+    "confirmPasswordPlaceholder": "Confirmar contraseña",
+    "registerButton": "Crear Cuenta",
+    "loginLink": "¿Ya tienes cuenta? Inicia sesión",
+    "errorName": "Debe ingresar su nombre",
+    "errorEmail": "Debe ingresar su correo",
+    "errorEmailInvalid": "Correo inválido",
+    "errorPassword": "Debe ingresar una contraseña",
+    "errorPasswordWeak": "Mín 8, 1 mayúscula y 1 carácter especial",
+    "errorConfirmPassword": "Debe confirmar la contraseña",
+    "errorPasswordMismatch": "Las contraseñas no coinciden",
+    "alertError": "Error",
+    "alertRegisterFailed": "No se pudo registrar"
+  },
+  "home": {
+    "totalIncome": "Total Ingresos",
+    "quickActions": "Acciones Rápidas",
+    "addMovement": "Añadir mov.",
+    "chatbot": "Chatbot",
+    "goals": "Metas",
+    "goalsPreview": "Tus metas",
+    "seeGoals": "Ver metas",
+    "period1D": "1D",
+    "period1M": "1M",
+    "period12M": "12M"
+  },
+  "transactions": {
+    "income": "Ingresos",
+    "expenses": "Gastos",
+    "net": "Neto",
+    "incomeButton": "Ingreso",
+    "expenseButton": "Gasto",
+    "amountPlaceholder": "Monto",
+    "descriptionPlaceholder": "Descripción (opcional)",
+    "saveButton": "Guardar movimiento"
+  },
+  "dashboard": {
+    "income": "Ingresos",
+    "expenses": "Gastos",
+    "net": "Neto"
+  },
+  "tabs": {
+    "home": "Inicio",
+    "news": "Noticias",
+    "recap": "Resumen",
+    "recommendation": "Recomendado",
+    "dashboard": "Dashboard"
+  },
+  "language": {
+    "spanish": "Español",
+    "english": "English"
+  }
+}

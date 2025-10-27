@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import SafeKeyboardScreen from '../../../components/ui/SafeKeyboardScreen';
 import api from '../../../constants/api';
 import styles, { C } from '../../../Styles/transactionsStyles';
 
@@ -25,9 +26,10 @@ const monthTitle = (d: Date) =>
   d.toLocaleDateString('es-CL', { year: 'numeric', month: 'long' });
 
 export default function Transactions() {
-  // Mes “canónico” siempre día 1
+  // Mes "canónico" siempre día 1
   const [monthDate, setMonthDate] = useState<Date>(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [list, setList] = useState<Tx[]>([]);
 
   // Form
@@ -50,6 +52,16 @@ export default function Transactions() {
   }, [ym]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Pull-to-refresh handler
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await load();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [load]);
 
   // KPIs
   const kpis = useMemo(() => {
@@ -90,7 +102,8 @@ export default function Transactions() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: C.bg1 }]}>
+    <SafeKeyboardScreen withTabBarPadding={true} bg={C.bg1}>
+      <View style={[styles.container, { backgroundColor: C.bg1 }]}>
       {/* Header navegación por mes */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.navBtn} onPress={prevMonth}>
@@ -136,6 +149,14 @@ export default function Transactions() {
           data={list}
           keyExtractor={(t) => String(t.id)}
           contentContainerStyle={{ paddingBottom: 180 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#2563EB"
+              colors={["#2563EB"]}
+            />
+          }
           renderItem={({ item }) => (
             <View style={styles.item}>
               <View style={{ flex: 1 }}>
@@ -173,7 +194,7 @@ export default function Transactions() {
         </View>
 
         <TextInput
-          style={styles.input}
+          style={styles.amountInput}
           placeholder="Monto"
           placeholderTextColor={C.muted}
           keyboardType="numeric"
@@ -181,7 +202,7 @@ export default function Transactions() {
           onChangeText={setAmount}
         />
         <TextInput
-          style={styles.input}
+          style={styles.descriptionInput}
           placeholder="Descripción (opcional)"
           placeholderTextColor={C.muted}
           value={desc}
@@ -193,5 +214,6 @@ export default function Transactions() {
         </TouchableOpacity>
       </View>
     </View>
+    </SafeKeyboardScreen>
   );
 }

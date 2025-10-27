@@ -6,10 +6,12 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  RefreshControl,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import SafeKeyboardScreen from "../../../components/ui/SafeKeyboardScreen";
 import api from "../../../constants/api";
 import { useAuth } from "../../../store/auth";
 
@@ -64,6 +66,7 @@ export default function Recommendation() {
 
   const [loadingUser, setLoadingUser] = useState(true);
   const [loadingRecs, setLoadingRecs] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [recs, setRecs] = useState<Rec[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -151,17 +154,31 @@ export default function Recommendation() {
     };
   }, [ready, user]);
 
+  // Pull-to-refresh handler
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refreshMe();
+      // The useEffect will automatically reload recommendations when user changes
+    } catch (e: any) {
+      if (__DEV__) console.log("[recs] refresh error:", e?.message);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshMe]);
+
   const showSpinner = loadingUser || loadingRecs;
 
   return (
-    <LinearGradient colors={["#2e3b55", "#1f2738"]} style={{ flex: 1 }}>
-      <View style={{ padding: 20, flex: 1 }}>
-        <Text style={{ fontSize: 24, fontWeight: "800", color: "#fff" }}>
-          💡 Recomendaciones
-        </Text>
-        <Text style={{ color: "#cbd5e1", marginBottom: 16 }}>
-          Basadas en tu perfil y objetivos.
-        </Text>
+    <SafeKeyboardScreen withTabBarPadding={true} bg="#2e3b55">
+      <LinearGradient colors={["#2e3b55", "#1f2738"]} style={{ flex: 1 }}>
+        <View style={{ padding: 20, flex: 1 }}>
+          <Text style={{ fontSize: 24, fontWeight: "800", color: "#fff", textAlign: "center" }}>
+            💡 Recomendaciones
+          </Text>
+          <Text style={{ color: "#cbd5e1", marginBottom: 16, textAlign: "center" }}>
+            Basadas en tu perfil y objetivos.
+          </Text>
 
         {showSpinner ? (
           <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
@@ -214,6 +231,14 @@ export default function Recommendation() {
               data={recs}
               keyExtractor={(item) => String(item.id)}
               contentContainerStyle={{ paddingBottom: 24 }}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  tintColor="#ffa000"
+                  colors={["#ffa000"]}
+                />
+              }
               renderItem={({ item }) => (
                 <View
                   style={{
@@ -260,6 +285,7 @@ export default function Recommendation() {
           <Text style={{ color: "#fff", fontWeight: "700" }}>⬅ Volver al Home</Text>
         </TouchableOpacity>
       </View>
-    </LinearGradient>
+      </LinearGradient>
+    </SafeKeyboardScreen>
   );
 }

@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 import { registerPushToken } from '@/utils/registerPush';
 import { useNotificationListeners } from '../../../hooks/useNotifications';
@@ -15,6 +16,7 @@ export default function TabLayout() {
   useNotificationListeners();
 
   // 🔐 tu JWT/sesión
+  const { t } = useTranslation();
   const { token: authToken } = useAuth();
 
   // evita doble registro
@@ -41,38 +43,59 @@ export default function TabLayout() {
           headerShown: false,
           tabBarHideOnKeyboard: true,
           tabBarActiveTintColor: '#ffb300',
-          tabBarInactiveTintColor: '#94a3b8',
-          tabBarLabelStyle: { fontSize: 12 },
+          tabBarInactiveTintColor: '#e2e8f0',
+          tabBarLabelStyle: { 
+            fontSize: 12,
+            fontWeight: '700',
+            marginTop: 4,
+            color: '#ffffff',
+            textShadowColor: 'rgba(0, 0, 0, 0.9)',
+            textShadowOffset: { width: 0, height: 1 },
+            textShadowRadius: 3,
+          },
+          tabBarIconStyle: {
+            marginBottom: 2,
+          },
+          tabBarItemStyle: {
+            paddingVertical: 4,
+          },
           tabBarStyle: {
-            backgroundColor: '#0f172a',
-            borderTopColor: '#0b1324',
+            backgroundColor: 'rgba(15, 23, 42, 0.92)',
+            borderTopColor: 'rgba(148, 163, 184, 0.3)',
+            borderTopWidth: 1,
             height: baseH + insets.bottom,
-            paddingBottom: Math.max(8, insets.bottom),
-            paddingTop: 6,
+            paddingBottom: Math.max(6, insets.bottom),
+            paddingTop: 8,
+            position: 'absolute',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 12,
+            elevation: 10,
           },
         }}
       >
         {/* Tabs visibles */}
         <Tabs.Screen
           name="home"
-          options={{ title: 'Inicio', tabBarIcon: ({ color, size }) => <Ionicons name="home" color={color} size={size} /> }}
+          options={{ title: t('tabs.home'), tabBarIcon: ({ color, size }) => <Ionicons name="home" color={color} size={size} /> }}
         />
         <Tabs.Screen
           name="news"
-          options={{ title: 'Noticias', tabBarIcon: ({ color, size }) => <Ionicons name="newspaper" color={color} size={size} /> }}
+          options={{ title: t('tabs.news'), tabBarIcon: ({ color, size }) => <Ionicons name="newspaper" color={color} size={size} /> }}
         />
 
         <Tabs.Screen
           name="recap"
-          options={{ title: 'Resumen', tabBarIcon: ({ color, size }) => <Ionicons name="stats-chart" color={color} size={size} /> }}
+          options={{ title: t('tabs.recap'), tabBarIcon: ({ color, size }) => <Ionicons name="stats-chart" color={color} size={size} /> }}
         />
         <Tabs.Screen
           name="recommendation"
-          options={{ title: 'Recomendado', tabBarIcon: ({ color, size }) => <Ionicons name="sparkles" color={color} size={size} /> }}
+          options={{ title: t('tabs.recommendation'), tabBarIcon: ({ color, size }) => <Ionicons name="sparkles" color={color} size={size} /> }}
         />
         <Tabs.Screen
           name="dashboard"
-          options={{ title: 'Dashboard', tabBarIcon: ({ color, size }) => <Ionicons name="analytics" color={color} size={size} /> }}
+          options={{ title: t('tabs.dashboard'), tabBarIcon: ({ color, size }) => <Ionicons name="analytics" color={color} size={size} /> }}
         />
 
         {/* Rutas ocultas */}

@@ -1,8 +1,9 @@
 // app/Screen/(tabs)/dashboard.tsx
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
+  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -83,6 +84,7 @@ const pieRadius = Math.min(chartW, pieH) / 2 - 20;
 export default function Dashboard() {
   const [month, setMonth] = useState<string>(() => dateToYM());
   const [busy, setBusy] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [summary, setSummary] = useState<SummaryMonth | null>(null);
   const [txs, setTxs] = useState<Tx[]>([]);
 
@@ -108,6 +110,23 @@ export default function Dashboard() {
     return () => {
       cancelled = true;
     };
+  }, [month]);
+
+  // Pull-to-refresh handler
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      const [sum, list] = await Promise.all([
+        api.summaryMonth({ month }),
+        api.listTransactions({ month }),
+      ]);
+      setSummary(sum as SummaryMonth);
+      setTxs(list as Tx[]);
+    } catch (e) {
+      console.error('dashboard refresh error', e);
+    } finally {
+      setRefreshing(false);
+    }
   }, [month]);
 
   /* ------- series diarias (línea) ------- */
@@ -192,7 +211,18 @@ export default function Dashboard() {
 
   /* ------------------ UI ------------------ */
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 24 }}>
+    <ScrollView 
+      style={styles.container} 
+      contentContainerStyle={{ paddingBottom: 80 }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="#2563EB"
+          colors={["#2563EB"]}
+        />
+      }
+    >
       {/* Header con mes */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.navBtn} onPress={() => setMonth((m) => nextYM(m, -1))}>

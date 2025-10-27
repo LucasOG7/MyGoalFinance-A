@@ -1,0 +1,71 @@
+{
+  "login": {
+    "title": "MyGoalFinance",
+    "subtitle": "Your financial future starts here",
+    "emailPlaceholder": "Email address",
+    "passwordPlaceholder": "Password",
+    "loginButton": "Sign In",
+    "registerLink": "Don't have an account? Sign up",
+    "alertAttention": "Attention",
+    "alertEnterCredentials": "Enter your email and password",
+    "alertError": "Error",
+    "alertLoginFailed": "Could not sign in"
+  },
+  "register": {
+    "title": "Create Account",
+    "subtitle": "Join MyGoalFinance",
+    "namePlaceholder": "Full name",
+    "emailPlaceholder": "Email address",
+    "passwordPlaceholder": "Password",
+    "confirmPasswordPlaceholder": "Confirm password",
+    "registerButton": "Create Account",
+    "loginLink": "Already have an account? Sign in",
+    "errorName": "You must enter your name",
+    "errorEmail": "You must enter your email",
+    "errorEmailInvalid": "Invalid email",
+    "errorPassword": "You must enter a password",
+    "errorPasswordWeak": "Min 8, 1 uppercase and 1 special character",
+    "errorConfirmPassword": "You must confirm the password",
+    "errorPasswordMismatch": "Passwords do not match",
+    "alertError": "Error",
+    "alertRegisterFailed": "Could not register"
+  },
+  "home": {
+    "totalIncome": "Total Income",
+    "quickActions": "Quick Actions",
+    "addMovement": "Add mov.",
+    "chatbot": "Chatbot",
+    "goals": "Goals",
+    "goalsPreview": "Your goals",
+    "seeGoals": "See goals",
+    "period1D": "1D",
+    "period1M": "1M",
+    "period12M": "12M"
+  },
+  "transactions": {
+    "income": "Income",
+    "expenses": "Expenses",
+    "net": "Net",
+    "incomeButton": "Income",
+    "expenseButton": "Expense",
+    "amountPlaceholder": "Amount",
+    "descriptionPlaceholder": "Description (optional)",
+    "saveButton": "Save transaction"
+  },
+  "dashboard": {
+    "income": "Income",
+    "expenses": "Expenses",
+    "net": "Net"
+  },
+  "tabs": {
+    "home": "Home",
+    "news": "News",
+    "recap": "Summary",
+    "recommendation": "Recommended",
+    "dashboard": "Dashboard"
+  },
+  "language": {
+    "spanish": "Español",
+    "english": "English"
+  }
+}

@@ -6,6 +6,7 @@ import { Platform } from 'react-native';
 
 import { AuthProvider, useAuth } from '../store/auth';
 import { registerForPush } from '../utils/registerPush';
+import '../i18n'; // Initialize i18n
 
 // ─────────────────────────────────────────────
 // Handler global: define cómo mostrar notificaciones
@@ -62,6 +63,15 @@ function AuthGate() {
     }
   }, [s0, s1, token, loading, router]);
 
+  // Register for push notifications when user is authenticated
+  useEffect(() => {
+    if (token) {
+      registerForPush(token).catch((e) => {
+        console.log('[push] register failed:', e?.message || e);
+      });
+    }
+  }, [token]);
+
   return <Slot />;
 }
 
@@ -74,12 +84,6 @@ export default function RootLayout() {
         importance: Notifications.AndroidImportance.DEFAULT,
       }).catch(() => {});
     }
-
-    // Registrar el dispositivo para push y enviar token al backend
-    // (si todavía no creaste utils/registerPush.ts, crea ese archivo primero)
-    registerForPush().catch((e) => {
-      console.log('[push] register failed:', e?.message || e);
-    });
   }, []);
 
   return (

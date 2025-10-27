@@ -8,7 +8,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
-  Linking,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -27,7 +26,6 @@ type SummaryMonth = {
 };
 
 type Rates = { base: 'CLP'; usd: number; eur: number; uf: number; updatedAt: string };
-type Article = { id: string; title: string; url: string; source?: string; published_at?: string | null };
 
 // ▼ NUEVO: tipo UI para metas + mapeo
 type GoalUI = { id: string; title: string; target: number; current: number };
@@ -49,7 +47,6 @@ export default function Home() {
   const [profile, setProfile] = useState<any>(null);
   const [sum, setSum] = useState<SummaryMonth | null>(null);
   const [rates, setRates] = useState<Rates | null>(null);
-  const [news, setNews] = useState<Article[]>([]);
   // ▼ metas ahora tipadas con GoalUI
   const [goals, setGoals] = useState<GoalUI[]>([]);
 
@@ -66,11 +63,10 @@ export default function Home() {
   const load = useCallback(async () => {
     try {
       setBusy(true);
-      const [p, s, r, nf, g] = await Promise.allSettled([
+      const [p, s, r, g] = await Promise.allSettled([
         api.getProfile(),
         api.summaryMonth(),           // KPIs mes actual
         api.newsRates(),              // USD/EUR/UF
-        api.newsFeed(),               // últimas noticias
         api.listGoals(),              // metas del usuario
       ]);
 
@@ -80,7 +76,6 @@ export default function Home() {
         setSum({ inc, exp, net, month });
       }
       if (r.status === 'fulfilled') setRates(r.value as Rates);
-      if (nf.status === 'fulfilled') setNews((nf.value as Article[]).slice(0, 3));
       if (g.status === 'fulfilled') {
         const arr = (g.value as any[] | undefined) ?? [];
         setGoals(arr.slice(0, 3).map(mapGoalUI)); // ← mapeo a UI + limit 3
@@ -110,8 +105,8 @@ export default function Home() {
       <LinearGradient colors={['#2e3b55', '#1f2738']} style={styles.header}>
         <View style={styles.headerContent}>
           <View>
-            <Text style={styles.brand}>MyGoalFinance</Text>
-            <Text style={styles.h1}>¡Hola, {firstName}! 👋</Text>
+            {/* <Text style={styles.brand}>MyGoalFinance</Text> */}
+            <Text style={styles.h1}>¡Hola, {firstName}! </Text>
             <Text style={styles.subtitle}>Tu panel de control financiero</Text>
           </View>
           {/* Profile Picture */}
@@ -170,12 +165,12 @@ export default function Home() {
           <KpiCard label="Neto" value={sum?.net ?? 0} color="#4dabf7" icon="wallet" />
         </View>
 
-        {/* Rates */}
+        {/* Rates
         <View style={styles.row}>
           <RateCard title="Dólar (USD)" value={rates?.usd} hint="1 CLP → USD" />
           <RateCard title="Euro (EUR)" value={rates?.eur} hint="1 CLP → EUR" />
           <RateCard title="UF" value={rates?.uf} hint={rates ? `Act: ${new Date(rates.updatedAt).toLocaleDateString()}` : ''} />
-        </View>
+        </View> */}
 
         {/* Quick actions */}
         <View style={styles.quickRow}>
@@ -216,27 +211,6 @@ export default function Home() {
                 </Pressable>
               );
             })
-          )}
-        </Section>
-
-        {/* News preview */}
-        <Section
-          title="Noticias financieras"
-          actionLabel="Ver noticias"
-          onAction={() => router.push('/Screen/(tabs)/news')}
-        >
-          {busy ? (
-            <Loader />
-          ) : news.length === 0 ? (
-            <Empty text="No hay noticias por ahora." />
-          ) : (
-            news.map((n) => (
-              <Pressable key={n.id} onPress={() => Linking.openURL(n.url)} style={styles.newsItem}>
-                <Text style={styles.newsTitle}>{n.title}</Text>
-                <Text style={styles.newsMeta}>{n.source || 'Fuente'} · {n.published_at ? new Date(n.published_at).toLocaleString() : ''}</Text>
-                <Text style={styles.newsLink}>Abrir</Text>
-              </Pressable>
-            ))
           )}
         </Section>
 

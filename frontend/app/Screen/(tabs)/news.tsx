@@ -78,6 +78,7 @@ export default function NewsScreen() {
   const Header = () => (
     <View>
       <Text style={styles.headerTitle}>Mercados & Noticias</Text>
+      <Text style={styles.sectionTitle}>Cambio de divisas</Text>
       <View style={styles.rateRow}>
         <View style={styles.rateCard}>
           <Text style={styles.rateLabel}>Dólar (USD)</Text>
@@ -85,7 +86,7 @@ export default function NewsScreen() {
             {rates ? fmtCLP(rates.usd) : '—'}
           </Text>
           <Text style={styles.rateSub}>
-            1 CLP ≈ {rates ? (1 / rates.usd).toFixed(6) : '—'} USD
+            1000 CLP ≈ {rates ? (1000 / rates.usd).toFixed(2) : '—'} USD
           </Text>
         </View>
         <View style={styles.rateCard}>
@@ -94,7 +95,7 @@ export default function NewsScreen() {
             {rates ? fmtCLP(rates.eur) : '—'}
           </Text>
           <Text style={styles.rateSub}>
-            1 CLP ≈ {rates ? (1 / rates.eur).toFixed(6) : '—'} EUR
+            1000 CLP ≈ {rates ? (1000 / rates.eur).toFixed(2) : '—'} EUR
           </Text>
         </View>
         <View style={styles.rateCard}>

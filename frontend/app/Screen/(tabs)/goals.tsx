@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
+  RefreshControl,
   ScrollView,
   Text,
   TextInput,
@@ -75,6 +76,7 @@ export default function Goals() {
 
   const [goals, setGoals] = useState<GoalUI[]>([]);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [newGoal, setNewGoal] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
@@ -103,6 +105,16 @@ export default function Goals() {
 
   useEffect(() => {
     fetchGoals();
+  }, [fetchGoals]);
+
+  // Pull-to-refresh handler
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchGoals();
+    } finally {
+      setRefreshing(false);
+    }
   }, [fetchGoals]);
 
   // POST /api/goals
@@ -179,7 +191,17 @@ export default function Goals() {
 
   return (
     <LinearGradient colors={['#2e3b55', '#1f2738']} style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView 
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#ffa000"
+            colors={["#ffa000"]}
+          />
+        }
+      >
         <Text style={styles.title}>🎯 Mis Metas Financieras</Text>
         <Text style={styles.subtitle}>
           Define, visualiza y sigue el progreso de tus objetivos.

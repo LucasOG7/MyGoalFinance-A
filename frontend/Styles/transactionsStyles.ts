@@ -32,7 +32,9 @@ export const C = {
   actionText: '#FFFFFF',
 
   // Inputs
-  inputBg: '#F1F5F9',
+  inputBg: '#F8FAFC',
+  inputBorder: '#E2E8F0',
+  inputFocus: '#2563EB',
 };
 
 const styles = StyleSheet.create({
@@ -125,11 +127,59 @@ const styles = StyleSheet.create({
   // Inputs
   input: {
     backgroundColor: C.inputBg,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: Platform.select({ ios: 12, android: 10 }),
-    marginBottom: 10,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: Platform.select({ ios: 16, android: 14 }),
+    marginBottom: 12,
     color: C.text,
+    fontSize: 16,
+    fontWeight: '500',
+    borderWidth: 1.5,
+    borderColor: C.inputBorder,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 3,
+    minHeight: 52,
+  },
+
+  // Input específico para monto con estilo destacado
+  amountInput: {
+    backgroundColor: C.inputBg,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: Platform.select({ ios: 18, android: 16 }),
+    marginBottom: 12,
+    color: C.text,
+    fontSize: 16,
+    fontWeight: '600',
+    borderWidth: 1.5,
+    borderColor: C.inputBorder,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 3,
+    minHeight: 56,
+    textAlign: 'left',
+  },
+
+  // Input para descripción con estilo más suave
+  descriptionInput: {
+    backgroundColor: C.inputBg,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: Platform.select({ ios: 16, android: 14 }),
+    marginBottom: 12,
+    color: C.text,
+    fontSize: 16,
+    fontWeight: '500',
+    borderWidth: 1.5,
+    borderColor: C.inputBorder,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 3,
+    minHeight: 52,
   },
 
   // Guardar
