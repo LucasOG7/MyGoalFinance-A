@@ -37,7 +37,7 @@ export default function Login() {
 
   return (
     <SafeKeyboardScreen scroll={false} bg="#0f172a" paddingH={0} paddingTop={0}>
-      {/* Language Selector */}
+      {/* Selector de idioma */}
       <LanguageSelector />
       
       {/* Degradado superior a ANCHO COMPLETO */}
@@ -56,7 +56,7 @@ export default function Login() {
         }}
       />
 
-      {/* Contenedor que centra perfectamente el modal en toda la pantalla */}
+      {/* Contenedor que centra el modal en toda la pantalla */}
       <View style={{ 
         flex: 1, 
         justifyContent: 'center', 
@@ -128,17 +128,17 @@ export default function Login() {
 
           {/* Contenido del modal con z-index superior */}
           <View style={{ position: 'relative', zIndex: 10 }}>
-            {/* Icono de chanchito centrado */}
+            {/* Icono de wallet centrado */}
             <View style={{ alignItems: 'center', marginBottom: 20 }}>
               <Ionicons name="wallet" size={60} color="#f5a623" />
             </View>
             
-            <Text style={styles.title}>{t('login.title')}</Text>
-            <Text style={styles.subtitle}>{t('login.subtitle')}</Text>
+            <Text style={styles.title}>{t('MyGoalFinance')}</Text>
+            <Text style={styles.subtitle}>{t('Tu futuro financiero comienza aquí')}</Text>
 
             <TextInput
               style={styles.input}
-              placeholder={t('login.emailPlaceholder')}
+              placeholder={t('Correo electrónico')}
               placeholderTextColor="#9aa3b2"
               keyboardType="email-address"
               autoCapitalize="none"
@@ -147,11 +147,11 @@ export default function Login() {
               returnKeyType="next"
             />
 
-            {/* Contraseña (con ojo) */}
+            {/* Contraseña con mostrar/ocutar */}
             <View style={{ position: 'relative' }}>
               <TextInput
                 style={[styles.input, { paddingRight: 44 }]}
-                placeholder={t('login.passwordPlaceholder')}
+                placeholder={t('Contraseña')}
                 placeholderTextColor="#9aa3b2"
                 secureTextEntry={!showPassword}
                 value={password}
@@ -173,11 +173,11 @@ export default function Login() {
               onPress={onSubmit}
               disabled={busy}
             >
-              {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginButtonText}>{t('login.loginButton')}</Text>}
+              {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginButtonText}>{t('Iniciar sesión')}</Text>}
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.registerButton} onPress={() => router.push('/Screen/register')} disabled={busy}>
-              <Text style={styles.registerButtonText}>{t('login.registerLink')}</Text>
+              <Text style={styles.registerButtonText}>{t('¿No tienes cuenta? Regístrate aquí')}</Text>
             </TouchableOpacity>
           </View>
         </View>

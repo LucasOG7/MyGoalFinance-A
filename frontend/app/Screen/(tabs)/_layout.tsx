@@ -3,13 +3,38 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
-import { Platform } from 'react-native';
+import { Platform, Animated } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { registerPushToken } from '@/utils/registerPush';
 import { useNotificationListeners } from '../../../hooks/useNotifications';
 import { useAuth } from '../../../store/auth';
+
+function AnimatedTabIcon({ name, color, size, focused }: { name: any; color: string; size: number; focused: boolean }) {
+  const scale = useRef(new Animated.Value(focused ? 1 : 0.96)).current;
+  const opacity = useRef(new Animated.Value(focused ? 1 : 0.8)).current;
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(scale, {
+        toValue: focused ? 1 : 0.96,
+        friction: 6,
+        tension: 120,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: focused ? 1 : 0.8,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [focused]);
+  return (
+    <Animated.View style={{ transform: [{ scale }], opacity }}>
+      <Ionicons name={name} color={color} size={size} />
+    </Animated.View>
+  );
+}
 
 export default function TabLayout() {
   // 🔔 listeners
@@ -19,7 +44,7 @@ export default function TabLayout() {
   const { t } = useTranslation();
   const { token: authToken } = useAuth();
 
-  // evita doble registro
+  // Evitar doble registro
   const registeredRef = useRef(false);
   useEffect(() => {
     if (!authToken || registeredRef.current) return;
@@ -78,24 +103,24 @@ export default function TabLayout() {
         {/* Tabs visibles */}
         <Tabs.Screen
           name="home"
-          options={{ title: t('tabs.home'), tabBarIcon: ({ color, size }) => <Ionicons name="home" color={color} size={size} /> }}
+          options={{ title: t('Inicio'), tabBarIcon: ({ color, size, focused }) => <AnimatedTabIcon name="home-sharp" color={color} size={size} focused={focused} /> }}
         />
         <Tabs.Screen
           name="news"
-          options={{ title: t('tabs.news'), tabBarIcon: ({ color, size }) => <Ionicons name="newspaper" color={color} size={size} /> }}
+          options={{ title: t('Noticias'), tabBarIcon: ({ color, size, focused }) => <AnimatedTabIcon name="book-sharp" color={color} size={size} focused={focused} /> }}
         />
 
         <Tabs.Screen
           name="recap"
-          options={{ title: t('tabs.recap'), tabBarIcon: ({ color, size }) => <Ionicons name="stats-chart" color={color} size={size} /> }}
+          options={{ title: t('Resumen'), tabBarIcon: ({ color, size, focused }) => <AnimatedTabIcon name="stats-chart-sharp" color={color} size={size} focused={focused} /> }}
         />
         <Tabs.Screen
           name="recommendation"
-          options={{ title: t('tabs.recommendation'), tabBarIcon: ({ color, size }) => <Ionicons name="sparkles" color={color} size={size} /> }}
+          options={{ title: t('Recomendaciones'), tabBarIcon: ({ color, size, focused }) => <AnimatedTabIcon name="sparkles-sharp" color={color} size={size} focused={focused} /> }}
         />
         <Tabs.Screen
           name="dashboard"
-          options={{ title: t('tabs.dashboard'), tabBarIcon: ({ color, size }) => <Ionicons name="analytics" color={color} size={size} /> }}
+          options={{ title: t('Dashboard'), tabBarIcon: ({ color, size, focused }) => <AnimatedTabIcon name="analytics-sharp" color={color} size={size} focused={focused} /> }}
         />
 
         {/* Rutas ocultas */}

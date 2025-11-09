@@ -88,7 +88,7 @@ export default function Profile() {
         </View>
 
         <View style={styles.infoRow}>
-          <Text style={styles.label}>📊 Nivel Finanzas:</Text>
+          <Text style={styles.label}>📊 Nivel en Finanzas:</Text>
           <Text style={styles.value}>{displayKnowledge}</Text>
         </View>
 
@@ -123,15 +123,6 @@ export default function Profile() {
         ) : (
           <Text style={styles.buttonText}>Cerrar sesión</Text>
         )}
-      </TouchableOpacity>
-
-      {/* Volver al Home */}
-      <TouchableOpacity
-        style={styles.link}
-        onPress={() => router.replace("/Screen/(tabs)/home")}
-        disabled={busy}
-      >
-        <Text style={styles.linkText}>Volver al Inicio</Text>
       </TouchableOpacity>
     </LinearGradient>
   );

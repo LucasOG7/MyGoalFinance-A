@@ -19,6 +19,9 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import api from '../../../constants/api';
 
+// Meses (abreviado)
+const MONTHS_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
 type SummaryMonth = {
   month: string;
   inc: number;
@@ -44,7 +47,10 @@ export default function Home() {
   const insets = useSafeAreaInsets();
   const [busy, setBusy] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState<'1D' | '1M' | '12M'>('1M');
+  // Selector de año y datos para gráfico de barras (ingresos por mes)
+  const thisYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState<number>(thisYear);
+  const [monthlyIncome, setMonthlyIncome] = useState<{ label: string; value: number; ym?: string }[]>([]);
 
   const [profile, setProfile] = useState<any>(null);
   const [sum, setSum] = useState<SummaryMonth | null>(null);
@@ -65,11 +71,12 @@ export default function Home() {
   const load = useCallback(async () => {
     try {
       setBusy(true);
-      const [p, s, r, g] = await Promise.allSettled([
+      const [p, s, r, g, t] = await Promise.allSettled([
         api.getProfile(),
         api.summaryMonth(),           // KPIs mes actual
         api.newsRates(),              // USD/EUR/UF
         api.listGoals(),              // metas del usuario
+        api.listTransactions({ from: `${selectedYear}-01-01`, to: `${selectedYear}-12-31` }), // transacciones del año seleccionado
       ]);
 
       if (p.status === 'fulfilled') setProfile(p.value);
@@ -80,12 +87,16 @@ export default function Home() {
       if (r.status === 'fulfilled') setRates(r.value as Rates);
       if (g.status === 'fulfilled') {
         const arr = (g.value as any[] | undefined) ?? [];
-        setGoals(arr.slice(0, 3).map(mapGoalUI)); // ← mapeo a UI + limit 3
+        setGoals(arr.slice(0, 2).map(mapGoalUI)); // ← mostrar solo 2 metas en Home
+      }
+      if (t.status === 'fulfilled') {
+        const txs = (t.value as any[]) ?? [];
+        setMonthlyIncome(buildMonthlyIncome(txs, selectedYear));
       }
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [selectedYear]);
 
   useEffect(() => {
     load();
@@ -108,7 +119,7 @@ export default function Home() {
         <View style={styles.headerContent}>
           <View>
             {/* <Text style={styles.brand}>MyGoalFinance</Text> */}
-            <Text style={styles.h1}>¡Hola, {firstName}! </Text>
+            <Text style={styles.h1}>¡Hola {firstName}! </Text>
             <Text style={styles.subtitle}>Tu panel de control financiero</Text>
           </View>
           {/* Profile Picture */}
@@ -133,50 +144,61 @@ export default function Home() {
         ]}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
+        
+        {/* Dashboard Principal - Ingresos por mes */}
+        <View style={styles.dashboardCard}>
+          <View style={styles.yearSelector}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              style={styles.yearArrowBtn}
+              onPress={() => setSelectedYear((y) => y - 1)}
+            >
+              <Text style={styles.yearArrowTxt}>{'<'}</Text>
+            </TouchableOpacity>
+            {[selectedYear - 2, selectedYear - 1, selectedYear].map((y) => (
+              <TouchableOpacity
+                key={y}
+                onPress={() => setSelectedYear(y)}
+                style={[styles.yearBtn, y === selectedYear && styles.yearBtnActive]}
+              >
+                <Text style={styles.yearBtnTxt}>{y}</Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity
+              accessibilityRole="button"
+              style={styles.yearArrowBtn}
+              onPress={() => setSelectedYear((y) => y + 1)}
+            >
+              <Text style={styles.yearArrowTxt}>{'>'}</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.dashboardLabel}>Ingresos por mes (Año {selectedYear})</Text>
+          <View style={styles.barChartWrap}>
+            <BarChart
+              data={monthlyIncome}
+              onBarPress={(ym) => {
+                if (!ym) return;
+                router.push({ pathname: '/Screen/(tabs)/transactions', params: { month: ym } });
+              }}
+            />
+          </View>
+        </View>
 
       {/* Acciones rápidas */}
       <Text style={styles.sectionTitle}>Acciones rápidas</Text>
       <View style={styles.quickRow}>
-        <QuickButton label="Añadir mov." icon="add-circle" onPress={() => router.push('/Screen/(tabs)/transactions')} />
-        <QuickButton label="Chatbot" icon="chatbubble-ellipses" onPress={() => router.push('/Screen/(tabs)/chatbot')} />
+        <QuickButton label="Añadir movimiento" icon="add-circle" onPress={() => router.push('/Screen/(tabs)/transactions')} />
+        <QuickButton label="Chatbot" icon="chatbox-ellipses" onPress={() => router.push('/Screen/(tabs)/chatbot')} />
         <QuickButton label="Metas" icon="flag" onPress={() => router.push('/Screen/(tabs)/goals')} />
       </View>
 
-        {/* Dashboard Principal - Total Ingresos */}
-        <View style={styles.dashboardCard}>
-          <Text style={styles.dashboardLabel}>Total Ingresos</Text>
-          <Text style={styles.dashboardValue}>{formatCLP(sum?.inc ?? 0)}</Text>
-          <View style={styles.dashboardIcon}>
-            <Ionicons name="link" size={20} color="#666" />
-          </View>
 
-          {/* Period Selector */}
-          <View style={styles.periodSelector}>
-            {(['1D', '1M', '12M'] as const).map((period) => (
-              <TouchableOpacity
-                key={period}
-                onPress={() => setSelectedPeriod(period)}
-                style={[
-                  styles.periodButton,
-                  selectedPeriod === period && styles.periodButtonActive
-                ]}
-              >
-                <Text style={[
-                  styles.periodButtonText,
-                  selectedPeriod === period && styles.periodButtonTextActive
-                ]}>
-                  {period}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
 
       {/* {Rates} */}
       <View style={styles.row}>
-        <RateCard title="Dólar (USD)" value={rates?.usd} hint="1 CLP → USD" />
-        <RateCard title="Euro (EUR)" value={rates?.eur} hint="1 CLP → EUR" />
-        <RateCard title="UF" value={rates?.uf} hint={rates ? `Act: ${new Date(rates.updatedAt).toLocaleDateString()}` : ''} />
+        <RateCard title="Dólar (USD):" value={rates?.usd} hint="1 CLP → USD" />
+        <RateCard title="Euro (EUR):" value={rates?.eur} hint="1 CLP → EUR" />
+        <RateCard title="UF:" value={rates?.uf} hint={rates ? `Fecha: ${new Date(rates.updatedAt).toLocaleDateString()}` : ''} />
       </View>
 
         {/* KPIs */}
@@ -229,6 +251,53 @@ export default function Home() {
 }
 
 /* ----------------------------- UI helpers ----------------------------- */
+
+// Construye array {label, value, ym} con ingresos por mes del año seleccionado
+function buildMonthlyIncome(txs: any[], year: number): { label: string; value: number; ym: string }[] {
+  const map: Record<string, number> = {};
+  for (let m = 1; m <= 12; m++) {
+    const ym = `${year}-${String(m).padStart(2, '0')}`;
+    map[ym] = 0;
+  }
+  for (const t of txs ?? []) {
+    const ym = String(t?.occurred_at ?? '').slice(0, 7);
+    if (t?.type === 'income' && map[ym] != null) {
+      map[ym] += Number(t?.amount ?? 0);
+    }
+  }
+  return Array.from({ length: 12 }, (_, i) => {
+    const ym = `${year}-${String(i + 1).padStart(2, '0')}`;
+    return {
+      label: MONTHS_SHORT[i],
+      value: map[ym] ?? 0,
+      ym,
+    };
+  });
+}
+
+function BarChart({ data, onBarPress }: { data: { label: string; value: number; ym?: string }[]; onBarPress?: (ym: string) => void }) {
+  const max = Math.max(...(data?.map((d) => d.value) ?? [0]), 1);
+  const MAX_H = 140;
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.barScroll}
+      contentContainerStyle={styles.barChartRow}
+    >
+      {(data ?? []).map((d, idx) => {
+        const h = Math.round((d.value / max) * MAX_H);
+        return (
+          <TouchableOpacity key={idx} style={styles.barItem} onPress={() => d.ym && onBarPress?.(d.ym)}>
+            <View style={[styles.bar, { height: h }]} />
+            <Text style={styles.barValue}>{formatCLP(d.value)}</Text>
+            <Text style={styles.barLabel}>{d.label}</Text>
+          </TouchableOpacity>
+        );
+      })}
+    </ScrollView>
+  );
+}
 
 function KpiCard({ label, value, color, icon }: { label: string; value: number; color: string; icon: keyof typeof Ionicons.glyphMap }) {
   return (

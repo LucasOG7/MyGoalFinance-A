@@ -1,50 +1,81 @@
 import { StyleSheet } from "react-native";
+
 const recommendationStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: 20,
-  },
+  container: { flex: 1 },
+  content: { padding: 20 },
+  headerWrap: { marginTop: -4, zIndex: 2 },
+
   title: {
     fontSize: 26,
-    fontWeight: "bold",
-    color: "white",
-    marginBottom: 5,
-    textAlign: "center",
+    fontWeight: "800",
+    color: "#ffffff",
+    marginBottom: 6,
+    textAlign: "left",
   },
-  subtitle: {
-    fontSize: 16,
-    color: "#ddd",
-    marginBottom: 20,
-    textAlign: "center",
+  subtitle: { fontSize: 14, color: "#cbd5e1", marginBottom: 16, textAlign: "left" },
+
+  levelRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    gap: 8,
+    marginBottom: 12,
   },
+  levelChip: {
+    backgroundColor: '#2a3441',
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(148,163,184,0.3)',
+  },
+  levelChipTxt: { color: '#cbd5e1', fontWeight: '700', fontSize: 12 },
+
+  listContent: { paddingTop: 22, paddingBottom: 24 },
+
   card: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
+    backgroundColor: '#1f2738',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(148,163,184,0.24)',
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
+  cardIconWrap: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#2a3441', alignItems: 'center', justifyContent: 'center' },
+  cardTitle: { color: '#e8edf7', fontWeight: '800' },
+  cardDesc: { color: '#9aa7bf', lineHeight: 20 },
+
+  infoCard: {
+    backgroundColor: '#1f2738',
+    borderRadius: 14,
+    padding: 14,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(148,163,184,0.24)',
+  },
+  infoText: { color: '#cbd5e1' },
+
+  errorCard: { backgroundColor: '#fee2e2', borderRadius: 8, padding: 10, marginBottom: 10 },
+  errorText: { color: '#b91c1c' },
+
+  ctaBtn: {
+    marginTop: 12,
+    backgroundColor: '#f59e0b',
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    shadowColor: '#f59e0b',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 8,
   },
-  cardText: {
-    fontSize: 16,
-    color: "#333",
-    lineHeight: 22,
-  },
-  button: {
-    backgroundColor: "#ff9800",
-    padding: 15,
-    borderRadius: 12,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
+  ctaTxt: { color: '#1f2738', fontWeight: '800' },
 });
+
 export default recommendationStyles;

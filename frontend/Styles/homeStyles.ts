@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start'
   },
   brand: { color: '#e8edf7', fontWeight: '700', fontSize: 18, marginBottom: 6 },
-  h1: { color: 'white', fontSize: 28, fontWeight: '800' },
+  h1: { color: 'white', fontSize: 28, fontWeight: '800', marginTop: 8 },
   subtitle: { color: '#c8d0e3', marginTop: 4 },
 
   // Profile Picture Styles
@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     borderWidth: 2,
-    borderColor: '#f3b34c',
+    borderColor: 'transparent',
   },
 
   // Dashboard Card Styles (similar to reference image)
@@ -139,6 +139,46 @@ const styles = StyleSheet.create({
   loader: { paddingVertical: 14, alignItems: 'center' },
   empty: { backgroundColor: '#1f2738', borderRadius: 14, padding: 14 },
   emptyTxt: { color: '#9aa7bf' },
+
+  // Estilos gráficos de barra
+  barChartWrap: { marginTop: 8 },
+  barScroll: { marginTop: 6 },
+  barChartRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 12, paddingVertical: 8 },
+  barItem: { alignItems: 'center', minWidth: 56 },
+  bar: { width: 28, backgroundColor: '#f59e0b', borderRadius: 8 },
+  barLabel: { color: '#aab4c6', marginTop: 6, fontSize: 12 },
+  barValue: { color: '#94a3b8', fontSize: 10, marginBottom: 4 },
+
+  // Year selector styles
+  yearSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 8,
+    marginBottom: 8,
+  },
+  yearBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#2a3441',
+  },
+  yearBtnActive: {
+    backgroundColor: '#3a4553',
+  },
+  yearBtnTxt: {
+    color: '#c8d0e3',
+    fontWeight: '700',
+  },
+  yearArrowBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2a3441',
+  },
+  yearArrowTxt: { color: '#c8d0e3', fontWeight: '700' },
 });
 
 export default styles;

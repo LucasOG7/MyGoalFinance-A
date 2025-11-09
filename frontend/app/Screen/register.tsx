@@ -78,7 +78,7 @@ export default function Register() {
   };
 
   return (
-    // 👇 Safe wrapper que permite scroll y evita que el teclado tape los campos
+    // Safe wrapper que permite scroll y evita que el teclado tape los campos
     <SafeKeyboardScreen
       scroll={false}
       bg="#0f172a"
@@ -87,10 +87,10 @@ export default function Register() {
       extraBottomPad={16}
       withTabBarPadding={false}
     >
-      {/* Language Selector - positioned like in login */}
+      {/* Selector de idioma */}
       <LanguageSelector />
       
-      {/* Degradado como en Home: ocupa TODO el ancho */}
+      {/* Estilo degradado */}
       <LinearGradient
         colors={['#1a2644', '#0f172a']}
         start={{ x: 0, y: 0 }}
@@ -129,13 +129,13 @@ export default function Register() {
             <Ionicons name="wallet" size={60} color="#f5a623" />
           </View>
           
-          <Text style={styles.title}>{t('register.title')}</Text>
-          <Text style={styles.subtitle}>{t('register.subtitle')}</Text>
+          <Text style={styles.title}>{t('Crear cuenta')}</Text>
+          <Text style={styles.subtitle}>{t('Únete a MyGoalFinance ')}</Text>
 
           {/* Nombre */}
           <TextInput
             style={[styles.input, errors.name && styles.inputError]}
-            placeholder={t('register.namePlaceholder')}
+            placeholder={t('Nombre usuario')}
             placeholderTextColor="#9aa3b2"
             value={name}
             onChangeText={setName}
@@ -149,7 +149,7 @@ export default function Register() {
           <TextInput
             ref={emailRef}
             style={[styles.input, errors.email && styles.inputError]}
-            placeholder={t('register.emailPlaceholder')}
+            placeholder={t('Correo electrónico')}
             placeholderTextColor="#9aa3b2"
             keyboardType="email-address"
             autoCapitalize="none"
@@ -167,7 +167,7 @@ export default function Register() {
             <TextInput
               ref={passRef}
               style={[styles.input, errors.password && styles.inputError, { paddingRight: 44 }]}
-              placeholder={t('register.passwordPlaceholder')}
+              placeholder={t('Contraseña')}
               placeholderTextColor="#9aa3b2"
               secureTextEntry={!showPass}
               value={password}
@@ -191,7 +191,7 @@ export default function Register() {
             <TextInput
               ref={confirmRef}
               style={[styles.input, errors.confirmPassword && styles.inputError, { paddingRight: 44 }]}
-              placeholder={t('register.confirmPasswordPlaceholder')}
+              placeholder={t('Confirmar contraseña')}
               placeholderTextColor="#9aa3b2"
               secureTextEntry={!showPass2}
               value={confirmPassword}
@@ -211,13 +211,13 @@ export default function Register() {
             <Text style={styles.errorText}>{errors.confirmPassword}</Text>
           )}
 
-          {/* Botón Registrar */}
+          {/* Botón Registrar/Crear Cuenta */}
           <TouchableOpacity
             style={[styles.registerButton, busy && { opacity: 0.7 }]}
             onPress={handleRegister}
             disabled={busy}
           >
-            {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.registerButtonText}>{t('register.registerButton')}</Text>}
+            {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.registerButtonText}>{t('Crear cuenta')}</Text>}
           </TouchableOpacity>
 
           {/* Volver al login */}
@@ -226,7 +226,7 @@ export default function Register() {
             onPress={() => router.replace('/Screen/login')}
             disabled={busy}
           >
-            <Text style={styles.loginButtonText}>{t('register.loginLink')}</Text>
+            <Text style={styles.loginButtonText}>{t('¿Ya tienes cuenta? Inicia sesión')}</Text>
           </TouchableOpacity>
         </View>
       </View>

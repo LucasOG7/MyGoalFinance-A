@@ -17,10 +17,10 @@ type User = {
   name?: string;
   age_range?: string;
   experience?: 'beginner' | 'intermediate' | 'advanced';
-  monthly_income?: number | string;   // ✅ nombre correcto (con h)
+  monthly_income?: number | string;
   finance_goal?: string;
   // Permitimos el alias antiguo para no romper si aparece
-  montly_income?: number | string;    // (alias legacy)
+  montly_income?: number | string;
   [k: string]: any;
 };
 

@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: palette.bg,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingTop: 12,
   },
 
@@ -28,17 +28,28 @@ const styles = StyleSheet.create({
 
   headerTitle: {
     color: palette.textPrimary,
-    fontSize: 22,
+    fontSize: 26,
     fontWeight: '800',
-    marginBottom: 16,
-    textAlign: 'center',
+    marginBottom: 6,
+    textAlign: 'left',
     letterSpacing: 0.5,
+    paddingTop: 14,
+  },
+
+  headerSubtitle: {
+    color: palette.textMuted,
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 22,
+    textAlign: 'left',
+    letterSpacing: 0.2,
   },
 
   rateRow: {
     flexDirection: 'row',
     gap: 10,
     marginBottom: 18,
+    paddingHorizontal: 6,
   },
   rateCard: {
     flex: 1,
@@ -95,6 +106,10 @@ const styles = StyleSheet.create({
     paddingBottom: 60,
   },
 
+  columnWrapper: {
+    gap: 12,
+  },
+
   newsCard: {
     backgroundColor: palette.cardAlt,
     borderWidth: 1,
@@ -102,12 +117,30 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 14,
     marginBottom: 12,
+    marginHorizontal: 6,
+    flex: 1,
     shadowColor: '#000',
     shadowOpacity: 0.12,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 3 },
     elevation: 3,
   },
+  newsRow: { flexDirection: 'row', alignItems: 'flex-start' },
+  newsThumb: {
+    width: 64,
+    height: 64,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+  },
+  newsThumbPlaceholder: {
+    width: 64,
+    height: 64,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
+    borderColor: palette.border,
+  },
+  newsContent: { flex: 1, marginLeft: 12 },
   newsTitle: {
     color: palette.textPrimary,
     fontSize: 16,
@@ -129,6 +162,43 @@ const styles = StyleSheet.create({
     fontSize: 14,
     letterSpacing: 0.2,
   },
+
+  // Estados de error / vacío con CTA
+  retryCard: {
+    backgroundColor: palette.card,
+    borderWidth: 1,
+    borderColor: palette.border,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  retryText: {
+    color: palette.textMuted,
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  retryBtn: {
+    backgroundColor: palette.brand,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  retryBtnText: { color: '#fff', fontWeight: '800' },
+
+  // Skeleton loaders
+  skeletonCard: {
+    backgroundColor: palette.cardAlt,
+    borderWidth: 1,
+    borderColor: palette.border,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
+  },
+  skeletonRow: { flexDirection: 'row', alignItems: 'center' },
+  skeletonThumb: { width: 64, height: 64, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.12)' },
+  skeletonLine: { height: 12, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.12)' },
 
   emptyText: {
     color: palette.textMuted,

@@ -3,6 +3,7 @@ import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TextInput, To
 import SafeKeyboardScreen from '../../../components/ui/SafeKeyboardScreen';
 import api from '../../../constants/api';
 import styles, { C } from '../../../Styles/transactionsStyles';
+import { useLocalSearchParams } from 'expo-router';
 
 type Tx = {
   id: number;
@@ -28,8 +29,30 @@ const monthTitle = (d: Date) => {
 };
 
 export default function Transactions() {
-  // Mes "canónico" siempre día 1
-  const [monthDate, setMonthDate] = useState<Date>(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+  const { month: monthParam } = useLocalSearchParams<{ month?: string }>();
+  // Mes "canónico" siempre día 1; inicializa desde `month` si viene en la ruta
+  const [monthDate, setMonthDate] = useState<Date>(() => {
+    const param = typeof monthParam === 'string' ? monthParam : '';
+    if (/^\d{4}-\d{2}$/.test(param)) {
+      const [y, m] = param.split('-').map((n) => Number(n));
+      return new Date(y, m - 1, 1);
+    }
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+
+  // Acepta cambios de parámetro `month` mientras la pantalla ya está montada
+  useEffect(() => {
+    const param = typeof monthParam === 'string' ? monthParam : '';
+    if (/^\d{4}-\d{2}$/.test(param)) {
+      const [y, m] = param.split('-').map((n) => Number(n));
+      const d = new Date(y, m - 1, 1);
+      // Evita set si ya está en el mismo mes
+      if (ymOf(d) !== ymOf(monthDate)) {
+        setMonthDate(d);
+      }
+    }
+  }, [monthParam]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [list, setList] = useState<Tx[]>([]);
@@ -93,7 +116,7 @@ export default function Transactions() {
         amount: val,
         type: tType,
         description: desc || undefined,
-        occurred_at: ymdLocal(), // 👈 SIEMPRE LOCAL (YYYY-MM-DD)
+        occurred_at: ymdLocal(), // SIEMPRE LOCAL (YYYY-MM-DD)
       });
       setAmount('');
       setDesc('');
@@ -107,7 +130,7 @@ export default function Transactions() {
     <SafeKeyboardScreen withTabBarPadding={true} bg={C.bg1} paddingTop={0}>
       <View style={[styles.container, { backgroundColor: C.bg1 }]}>
       {/* Título principal */}
-      <Text style={styles.mainTitle}>Transacciones</Text>
+      <Text style={styles.mainTitle}>Movimientos</Text>
       
       {/* Header navegación por mes */}
       <View style={styles.header}>

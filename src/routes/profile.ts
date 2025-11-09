@@ -6,7 +6,7 @@ import { getAuthUserFromRequest } from '../utils/auth-helpers';
 
 const router = Router();
 
-/** Columnas que EXISTEN en tu tabla (usa monthly_income con "h") */
+/** Columnas que existen en la tabla */
 const PROFILE_COLUMNS = [
   'email',
   'name',

@@ -339,7 +339,7 @@ export default function Chatbot() {
             )}
           </View>
 
-          {/* Barra de entrada SIEMPRE ABAJO */}
+          {/* Barra de entrada/input */}
           <View style={[
             styles.inputBar, 
             { 
