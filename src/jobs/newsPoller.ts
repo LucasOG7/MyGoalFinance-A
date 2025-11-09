@@ -11,16 +11,62 @@ const NEWS_INTERVAL_MS  = 30 * 60 * 1000;  // 30 min
 // misma función de rates que en la ruta
 async function fetchRatesCL() {
   const base = 'https://mindicador.cl/api';
-  const [dolar, euro, uf] = await Promise.all([
-    fetch(`${base}/dolar`).then(r => r.json()).catch(() => null),
-    fetch(`${base}/euro`).then(r => r.json()).catch(() => null),
-    fetch(`${base}/uf`).then(r => r.json()).catch(() => null),
-  ]);
-  const usd = Number(dolar?.serie?.[0]?.valor ?? 0);
-  const eur = Number(euro?.serie?.[0]?.valor ?? 0);
-  const ufv = Number(uf?.serie?.[0]?.valor ?? 0);
-  if (!usd || !eur || !ufv) throw new Error('mindicador: datos incompletos');
-  return { usd, eur, uf: ufv };
+  
+  try {
+    const [dolar, euro, uf] = await Promise.all([
+      fetch(`${base}/dolar`).then(r => r.json()).catch(err => {
+        console.error('[fetchRatesCL] Error fetching USD:', err.message);
+        return null;
+      }),
+      fetch(`${base}/euro`).then(r => r.json()).catch(err => {
+        console.error('[fetchRatesCL] Error fetching EUR:', err.message);
+        return null;
+      }),
+      fetch(`${base}/uf`).then(r => r.json()).catch(err => {
+        console.error('[fetchRatesCL] Error fetching UF:', err.message);
+        return null;
+      }),
+    ]);
+
+    console.log('[fetchRatesCL] Raw responses:', { 
+      dolar: dolar ? 'OK' : 'NULL', 
+      euro: euro ? 'OK' : 'NULL', 
+      uf: uf ? 'OK' : 'NULL' 
+    });
+
+    const usd = Number(dolar?.serie?.[0]?.valor ?? 0);
+    const eur = Number(euro?.serie?.[0]?.valor ?? 0);
+    const ufv = Number(uf?.serie?.[0]?.valor ?? 0);
+
+    console.log('[fetchRatesCL] Parsed values:', { usd, eur, uf: ufv });
+
+    if (!usd || !eur || !ufv) {
+      console.error('[fetchRatesCL] Datos incompletos detectados:', { 
+        usd: usd || 'MISSING', 
+        eur: eur || 'MISSING', 
+        uf: ufv || 'MISSING' 
+      });
+      
+      // Usar valores por defecto temporales para evitar que la app se rompa
+      return {
+        usd: usd || 950, // Valor aproximado USD/CLP
+        eur: eur || 1000, // Valor aproximado EUR/CLP  
+        uf: ufv || 37000, // Valor aproximado UF/CLP
+        isDefault: true
+      };
+    }
+
+    return { usd, eur, uf: ufv, isDefault: false };
+  } catch (error) {
+    console.error('[fetchRatesCL] Error general:', error);
+    // Valores por defecto en caso de error completo
+    return {
+      usd: 950,
+      eur: 1000,
+      uf: 37000,
+      isDefault: true
+    };
+  }
 }
 
 async function pollRatesAndNotify() {
@@ -38,7 +84,11 @@ async function pollRatesAndNotify() {
 
     // guarda snapshot actual
     await supabaseAdmin.from('fx_snapshot').insert({
-      base: 'CLP', usd: cur.usd, eur: cur.eur, uf: cur.uf
+      base: 'CLP', 
+      usd: cur.usd, 
+      eur: cur.eur, 
+      uf: cur.uf,
+      is_default: cur.isDefault || false
     });
 
     if (last) {
