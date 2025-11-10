@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { registerPushToken } from '@/utils/registerPush';
 import { useNotificationListeners } from '../../../hooks/useNotifications';
 import { useAuth } from '../../../store/auth';
+import ConnectivityBanner from '../../../components/ui/ConnectivityBanner';
 
 function AnimatedTabIcon({ name, color, size, focused }: { name: any; color: string; size: number; focused: boolean }) {
   const scale = useRef(new Animated.Value(focused ? 1 : 0.96)).current;
@@ -129,6 +130,8 @@ export default function TabLayout() {
         <Tabs.Screen name="goals" options={{ href: null }} />
         <Tabs.Screen name="transactions" options={{ href: null }} />
       </Tabs>
+      {/* Aviso de conectividad global sobre la barra de tabs */}
+      <ConnectivityBanner bottomOffset={baseH + Math.max(6, insets.bottom) + 6} />
     </SafeAreaView>
   );
 }

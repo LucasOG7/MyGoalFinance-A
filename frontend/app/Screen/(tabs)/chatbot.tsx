@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
+  Keyboard,
   Platform,
   Text,
   TextInput,
@@ -34,6 +35,8 @@ export default function Chatbot() {
   const [sending, setSending] = useState(false);
   const [typing, setTyping] = useState(false);
   const [streamingText, setStreamingText] = useState('');
+  // Altura del teclado en Android para evitar solapamiento del input
+  const [androidKeyboardH, setAndroidKeyboardH] = useState(0);
 
   // Cargar historial
   useEffect(() => {
@@ -69,6 +72,25 @@ export default function Chatbot() {
         }
         esRef.current = null;
       }
+    };
+  }, []);
+
+  // Ajuste dinámico en Android: cuando aparece el teclado, levantamos la barra de input
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    const showSub = Keyboard.addListener('keyboardDidShow', (e) => {
+      const h = e?.endCoordinates?.height ?? 0;
+      setAndroidKeyboardH(h);
+      requestAnimationFrame(() =>
+        listRef.current?.scrollToEnd({ animated: true })
+      );
+    });
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+      setAndroidKeyboardH(0);
+    });
+    return () => {
+      showSub.remove();
+      hideSub.remove();
     };
   }, []);
 
@@ -309,7 +331,7 @@ export default function Chatbot() {
                       Platform.OS === 'ios' 
                         ? insets.bottom + Math.min(120, Math.max(48, inputHeight)) + 20
                         : Platform.OS === 'android'
-                          ? Math.min(120, Math.max(48, inputHeight)) + 80
+                          ? Math.min(120, Math.max(48, inputHeight)) + 80 + androidKeyboardH
                           : Math.min(120, Math.max(48, inputHeight)) + 80,
                   },
                 ]}
@@ -348,7 +370,13 @@ export default function Chatbot() {
                 : Platform.OS === 'android' 
                   ? 16 
                   : 12,
-              marginBottom: Platform.OS === 'web' ? 60 : 0
+              // En Android, levantamos la barra según la altura del teclado
+              marginBottom:
+                Platform.OS === 'android'
+                  ? androidKeyboardH
+                  : Platform.OS === 'web'
+                    ? 60
+                    : 0,
             }
           ]}>
             <TextInput
