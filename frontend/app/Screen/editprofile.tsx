@@ -1,7 +1,7 @@
 // app/Screen/edit-profile.tsx
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -11,18 +11,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import SafeKeyboardScreen from '../../components/ui/SafeKeyboardScreen';
 import api from '../../constants/api';
 import { useAuth } from '../../store/auth';
 import editprofileStyles from '../../Styles/editprofileStyles';
 
-function ageToRange(ageNum: number) {
-  if (ageNum <= 0 || Number.isNaN(ageNum)) return null;
-  if (ageNum <= 25) return '18-25';
-  if (ageNum <= 35) return '26-35';
-  if (ageNum <= 45) return '36-45';
-  return '46+';
-}
+const AGE_OPTIONS = ['18-25', '26-35', '36-45', '46+'] as const;
+const LEVEL_OPTIONS = ['Básico', 'Intermedio', 'Avanzado'] as const;
+
 function toExperience(v: string): 'beginner' | 'intermediate' | 'advanced' {
   const s = v.trim().toLowerCase();
   if (s.startsWith('bás') || s.startsWith('bas')) return 'beginner';
@@ -35,7 +32,7 @@ export default function EditProfile() {
   const { user, refreshMe } = useAuth();
 
   // Prefills
-  const [age, setAge] = useState(user?.age_range?.match(/^\d+/)?.[0] ?? '');
+  const [ageRange, setAgeRange] = useState<string>(user?.age_range ?? '18-25');
   const [level, setLevel] = useState(
     user?.experience === 'beginner'
       ? 'Básico'
@@ -52,18 +49,42 @@ export default function EditProfile() {
   const [busy, setBusy] = useState(false);
 
   // Refs para saltar entre inputs
-  const levelRef = useRef<TextInput>(null);
   const incomeRef = useRef<TextInput>(null);
   const goalRef = useRef<TextInput>(null);
+
+  // helpers
+  const onlyDigits = (s: string) => s.replace(/[^\d]/g, '');
+  const formatCLP = (n: number) => n.toLocaleString('es-CL');
+
+  // estado "dirty" para habilitar/deshabilitar guardar y confirmar cancelar
+  const initial = useMemo(() => ({
+    ageRange: user?.age_range ?? '18-25',
+    level:
+      user?.experience === 'beginner'
+        ? 'Básico'
+        : user?.experience === 'intermediate'
+        ? 'Intermedio'
+        : user?.experience === 'advanced'
+        ? 'Avanzado'
+        : '',
+    income: user?.monthly_income != null ? String(user.monthly_income) : '',
+    goal: user?.finance_goal ?? '',
+  }), [user]);
+  const isDirty = useMemo(
+    () =>
+      ageRange !== initial.ageRange ||
+      level !== initial.level ||
+      income !== initial.income ||
+      goal !== initial.goal,
+    [ageRange, level, income, goal, initial]
+  );
 
   const onSave = async () => {
     try {
       setBusy(true);
-      const ageNum = Number(age);
-      const age_range = ageToRange(ageNum);
-      if (!age_range) return Alert.alert('Valida tu edad', 'Ingresa una edad válida.');
+      const age_range = ageRange;
 
-      const monthly_income = Number(income);
+      const monthly_income = Number(onlyDigits(income));
       if (Number.isNaN(monthly_income) || monthly_income < 0) {
         return Alert.alert('Valida tus ingresos', 'Ingresa un número válido.');
       }
@@ -84,97 +105,125 @@ export default function EditProfile() {
     }
   };
 
+  const onCancel = () => {
+    if (isDirty) {
+      Alert.alert('Descartar cambios', 'Tienes cambios sin guardar, ¿quieres salir?', [
+        { text: 'Seguir editando', style: 'cancel' },
+        { text: 'Salir', style: 'destructive', onPress: () => router.back() },
+      ]);
+    } else {
+      router.back();
+    }
+  };
+
   return (
     <SafeKeyboardScreen
       scroll
       style={editprofileStyles.container} // usa tu container (centrado vertical)
-      bg="#312d69"
+      bg="transparent"
+      bgGradientColors={["#2e3b55", "#1f2738"] as const}
       paddingH={20}
       extraBottomPad={16}
       contentJustify="center"            // centra la card como en tu StyleSheet
     >
-      {/* Fondo gradiente absoluto */}
-      <LinearGradient
-        colors={["#2e3b55", "#1f2738"]}
-        style={StyleSheet.absoluteFillObject}
-      />
 
       {/* Card */}
       <View style={editprofileStyles.card}>
         <Text style={editprofileStyles.title}>Editar Perfil</Text>
 
         <Text style={editprofileStyles.label}>Edad</Text>
-        <TextInput
-          placeholder="18"
-          keyboardType="numeric"
-          value={age}
-          onChangeText={setAge}
-          returnKeyType="next"
-          blurOnSubmit={false}
-          onSubmitEditing={() => levelRef.current?.focus()}
-          style={editprofileStyles.input}
-          editable={!busy}
-        />
+        <View style={editprofileStyles.chipRow}>
+          {AGE_OPTIONS.map((opt) => (
+            <TouchableOpacity
+              key={opt}
+              onPress={() => setAgeRange(opt)}
+              style={[editprofileStyles.chip, ageRange === opt && editprofileStyles.chipActive]}
+              accessibilityRole="button"
+              accessibilityLabel={`Edad ${opt}`}
+            >
+              <Text style={[editprofileStyles.chipText, ageRange === opt && editprofileStyles.chipTextActive]}>{opt}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
         <Text style={editprofileStyles.label}>Nivel en Finanzas</Text>
-        <TextInput
-          ref={levelRef}
-          placeholder="Básico / Intermedio / Avanzado"
-          value={level}
-          onChangeText={setLevel}
-          autoCapitalize="sentences"
-          returnKeyType="next"
-          blurOnSubmit={false}
-          onSubmitEditing={() => incomeRef.current?.focus()}
-          style={editprofileStyles.input}
-          editable={!busy}
-        />
+        <View style={editprofileStyles.chipRow}>
+          {LEVEL_OPTIONS.map((opt) => (
+            <TouchableOpacity
+              key={opt}
+              onPress={() => setLevel(opt)}
+              style={[editprofileStyles.chip, level === opt && editprofileStyles.chipActive]}
+              accessibilityRole="button"
+              accessibilityLabel={`Nivel ${opt}`}
+            >
+              <Text style={[editprofileStyles.chipText, level === opt && editprofileStyles.chipTextActive]}>{opt}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
         <Text style={editprofileStyles.label}>Ingresos Mensuales (CLP)</Text>
-        <TextInput
-          ref={incomeRef}
-          placeholder="500000"
-          keyboardType="numeric"
-          value={income}
-          onChangeText={setIncome}
-          returnKeyType="next"
-          blurOnSubmit={false}
-          onSubmitEditing={() => goalRef.current?.focus()}
-          style={editprofileStyles.input}
-          editable={!busy}
-        />
+        <View style={editprofileStyles.inputRow}>
+          <Ionicons name="cash-outline" size={18} color="#cbd5e1" style={editprofileStyles.inputIcon} />
+          <TextInput
+            ref={incomeRef}
+            placeholder="500000"
+            keyboardType="numeric"
+            value={income}
+            onChangeText={(t) => setIncome(onlyDigits(t))}
+            onBlur={() => setIncome((v) => String(formatCLP(Number(onlyDigits(v)) || 0)))}
+            returnKeyType="next"
+            blurOnSubmit={false}
+            onSubmitEditing={() => goalRef.current?.focus()}
+            style={editprofileStyles.input}
+            editable={!busy}
+          />
+        </View>
 
         <Text style={editprofileStyles.label}>Meta Financiera</Text>
-        <TextInput
-          ref={goalRef}
-          placeholder="Ahorrar / Pagar deudas..."
-          value={goal}
-          onChangeText={setGoal}
-          returnKeyType="done"
-          onSubmitEditing={onSave}
-          style={editprofileStyles.input}
-          editable={!busy}
-        />
+        <View style={editprofileStyles.inputRow}>
+          <Ionicons name="rocket-outline" size={18} color="#cbd5e1" style={editprofileStyles.inputIcon} />
+          <TextInput
+            ref={goalRef}
+            placeholder="Ahorrar / Pagar deudas..."
+            value={goal}
+            onChangeText={setGoal}
+            returnKeyType="done"
+            onSubmitEditing={onSave}
+            style={editprofileStyles.input}
+            editable={!busy}
+          />
+        </View>
+        <View style={editprofileStyles.chipRow}>
+          {['Ahorrar', 'Pagar deudas', 'Invertir', 'Viaje', 'Fondo emergencia'].map((opt) => (
+            <TouchableOpacity key={opt} onPress={() => setGoal(opt)} style={editprofileStyles.chipSmall}>
+              <Text style={editprofileStyles.chipSmallText}>{opt}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-        <TouchableOpacity
-          onPress={onSave}
-          disabled={busy}
-          style={[editprofileStyles.button, busy && { opacity: 0.7 }]}
-        >
-          {busy ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={editprofileStyles.buttonText}>Guardar Cambios</Text>
-          )}
-        </TouchableOpacity>
+        <View style={editprofileStyles.actionsRow}>
+          <TouchableOpacity
+            onPress={onSave}
+            disabled={busy || !isDirty}
+            style={[editprofileStyles.primaryButton, (busy || !isDirty) && { opacity: 0.8 }]}
+          >
+            {busy ? (
+              <ActivityIndicator color="#1f2937" />
+            ) : (
+              <>
+                <Text style={editprofileStyles.primaryButtonText}>Guardar Cambios</Text>
+              </>
+            )}
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => router.back()}
-          disabled={busy}
-          style={editprofileStyles.cancelButton}
-        >
-          <Text style={editprofileStyles.cancelText}>Cancelar</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={onCancel}
+            disabled={busy}
+            style={editprofileStyles.cancelButton}
+          >
+            <Text style={editprofileStyles.cancelText}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeKeyboardScreen>
   );

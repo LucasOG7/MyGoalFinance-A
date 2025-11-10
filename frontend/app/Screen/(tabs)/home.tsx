@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import api from '../../../constants/api';
+import { useAuth } from '../../../store/auth';
 
 // Meses (abreviado)
 const MONTHS_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -45,6 +46,7 @@ function mapGoalUI(g: any): GoalUI {
 export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { user, refreshMe } = useAuth();
   const [busy, setBusy] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   // Selector de año y datos para gráfico de barras (ingresos por mes)
@@ -63,10 +65,12 @@ export default function Home() {
     return n.split(' ')[0] || '¡Hola!';
   }, [profile]);
 
-  // Avatar dinámico basado en el email del usuario
+  // Avatar desde el store si existe; fallback a pravatar usando email
   const avatarUri = useMemo(() => {
-    return "https://i.pravatar.cc/300?u=" + (profile?.email || "user");
-  }, [profile?.email]);
+    if (user?.avatar_uri) return String(user.avatar_uri);
+    const key = user?.email || profile?.email || 'user';
+    return 'https://i.pravatar.cc/300?u=' + key;
+  }, [user?.avatar_uri, user?.email, profile?.email]);
 
   const load = useCallback(async () => {
     try {
@@ -105,11 +109,13 @@ export default function Home() {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
+      // Refrescar usuario (incluye avatar_uri desde AsyncStorage) y datos del dashboard
+      await refreshMe();
       await load();
     } finally {
       setRefreshing(false);
     }
-  }, [load]);
+  }, [load, refreshMe]);
 
   return (
     <SafeAreaView style={styles.safe} edges={['left', 'right']}>

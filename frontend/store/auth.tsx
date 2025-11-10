@@ -19,6 +19,8 @@ type User = {
   experience?: 'beginner' | 'intermediate' | 'advanced';
   monthly_income?: number | string;
   finance_goal?: string;
+  // URI de avatar (data:base64 o http/https)
+  avatar_uri?: string | null;
   // Permitimos el alias antiguo para no romper si aparece
   montly_income?: number | string;
   [k: string]: any;
@@ -70,9 +72,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     (async () => {
       try {
-        const [[, t], [, u]] = await AsyncStorage.multiGet(['token', 'user']);
+        const [[, t], [, u], [, avatar]] = await AsyncStorage.multiGet([
+          'token',
+          'user',
+          'avatar_uri',
+        ]);
         setToken(t ?? null);
-        setUser(u ? normalizeUser(JSON.parse(u)) : null);
+        const base = u ? normalizeUser(JSON.parse(u)) : null;
+        const merged = base ? { ...base, avatar_uri: avatar ?? base.avatar_uri ?? null } : null;
+        setUser(merged);
       } catch {
         setToken(null);
         setUser(null);
@@ -87,9 +95,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
     try {
       const me = await api.getProfile();
       const normalized = normalizeUser(me);
-      setUser(normalized);
-      if (normalized) {
-        await AsyncStorage.setItem('user', JSON.stringify(normalized));
+      // hidratar avatar_uri desde almacenamiento local
+      const avatar = await AsyncStorage.getItem('avatar_uri');
+      const merged = normalized ? { ...normalized, avatar_uri: avatar ?? normalized.avatar_uri ?? null } : null;
+      setUser(merged);
+      if (merged) {
+        await AsyncStorage.setItem('user', JSON.stringify(merged));
       }
     } catch {
       // Silencioso
@@ -105,9 +116,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
     // Intentar perfil completo; si falla, usar res.user
     const me = await api.getProfile().catch(() => res.user ?? null);
     const normalized = normalizeUser(me);
-    setUser(normalized);
-    if (normalized) {
-      await AsyncStorage.setItem('user', JSON.stringify(normalized));
+    const avatar = await AsyncStorage.getItem('avatar_uri');
+    const merged = normalized ? { ...normalized, avatar_uri: avatar ?? normalized.avatar_uri ?? null } : null;
+    setUser(merged);
+    if (merged) {
+      await AsyncStorage.setItem('user', JSON.stringify(merged));
     }
   }, []);
 
@@ -127,7 +140,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setUser(null);
       setToken(null);
       setPendingCreds(null);
-      await AsyncStorage.multiRemove(['token', 'user']);
+      await AsyncStorage.multiRemove(['token', 'user', 'avatar_uri']);
     }
   }, []);
 

@@ -7,12 +7,16 @@ import {
   StyleProp,
   View,
   ViewStyle,
+  StyleSheet,
 } from 'react-native';
+import type { ColorValue } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = PropsWithChildren<{
   style?: StyleProp<ViewStyle>;
   bg?: string;
+  bgGradientColors?: readonly [ColorValue, ColorValue, ...ColorValue[]]; // Gradiente absoluto
   extraBottomPad?: number;
   withTabBarPadding?: boolean;
   paddingH?: number;
@@ -27,6 +31,7 @@ export default function SafeKeyboardScreen({
   children,
   style,
   bg = '#0f172a',
+  bgGradientColors,
   extraBottomPad = 0,
   withTabBarPadding = false,
   paddingH = 0,
@@ -85,6 +90,12 @@ export default function SafeKeyboardScreen({
 
   return (
     <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: bg }}>
+      {bgGradientColors ? (
+        <LinearGradient
+          colors={bgGradientColors}
+          style={StyleSheet.absoluteFillObject}
+        />
+      ) : null}
       {Platform.OS === 'web' ? (
         // 🚫 En web no usamos KAV para evitar pérdidas de foco
         Inner
