@@ -2,6 +2,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 
 import authRoutes from './routes/auth';
 import profileRoutes from './routes/profile';
@@ -16,23 +17,80 @@ import { startNewsAndRatesPolling } from './jobs/newsPoller';
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
+const PROD = process.env.NODE_ENV === 'production';
+const REQUIRE_HTTPS = process.env.REQUIRE_HTTPS === '1';
 
-/** CORS: abierto para dev (ajusta origin en prod) */
-const corsOptions: cors.CorsOptions = {
-  origin: (origin, cb) => cb(null, true),
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  maxAge: 86400,
-};
+/** CORS: abierto en dev, restringido en producción por ALLOWED_ORIGINS (lista separada por comas) */
+function buildCorsOptions(): cors.CorsOptions {
+  const allowed = (process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (!PROD || allowed.length === 0) {
+    return {
+      origin: (_origin, cb) => cb(null, true),
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      credentials: true,
+      maxAge: 86400,
+    };
+  }
+  return {
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, false);
+      const ok = allowed.some((o) => origin === o);
+      return cb(ok ? null : new Error('Origin no permitido'), ok);
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    maxAge: 86400,
+  };
+}
+
+const corsOptions = buildCorsOptions();
 
 app.use(cors(corsOptions));
+// Quitar cabecera X-Powered-By y confiar en proxy para HTTPS detection
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
+
+// Cabeceras de seguridad básicas (sin depender de helmet)
 app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  if (PROD) {
+    // HSTS sólo en producción
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
   if (req.method === 'OPTIONS') return res.sendStatus(204);
   next();
 });
 
-app.use(express.json());
+// Limitar tamaño de JSON para evitar payloads excesivos
+app.use(express.json({ limit: '100kb' }));
+
+// Rate limit global (defensivo, evita abusos y brute-force general)
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 300, // hasta 300 req/IP por ventana
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(globalLimiter);
+
+// En producción y si se requiere, rechazar tráfico no-HTTPS
+if (PROD && REQUIRE_HTTPS) {
+  app.use((req, res, next) => {
+    const proto = req.get('x-forwarded-proto');
+    const secure = req.secure || proto === 'https';
+    if (!secure) return res.status(400).json({ detail: 'HTTPS requerido' });
+    next();
+  });
+}
 
 app.get('/', (_req, res) => res.json({ message: 'MyGoalFinance API (Node + Supabase)' }));
 app.get('/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));

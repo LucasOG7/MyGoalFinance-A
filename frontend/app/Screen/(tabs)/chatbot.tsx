@@ -1,6 +1,6 @@
 // app/Screen/chatbot.tsx
 import styles from '@/Styles/chatbotStyles';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken as getSecureToken } from '../../../utils/secureStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -157,7 +157,7 @@ export default function Chatbot() {
       setTyping(true);
       setStreamingText('');
 
-      const token = await AsyncStorage.getItem('token');
+      const token = await getSecureToken();
       const url = `${API_URL}${API_PREFIX}/chat/stream?q=${encodeURIComponent(
         text
       )}`;

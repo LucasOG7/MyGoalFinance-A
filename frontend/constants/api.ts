@@ -1,8 +1,8 @@
 // constants/api.ts
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { API_PREFIX, API_URL } from './config';
+import { getToken as getSecureToken } from '../utils/secureStore';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -45,11 +45,22 @@ function resolveApiUrl(configUrl?: string) {
     return `http://${host}:${port}`;
   }
 
-  if (configUrl && !/^undefined$/.test(configUrl) && configUrl.trim() !== '') {
-    return configUrl;
-  }
+  let url = configUrl && !/^undefined$/.test(configUrl) && configUrl.trim() !== ''
+    ? configUrl
+    : (extra || env || 'http://192.168.1.102:3000');
 
-  return extra || env || 'http://192.168.1.102:3000';
+  // En producción exigir/advertir HTTPS; opcionalmente forzar si EXPO_PUBLIC_FORCE_HTTPS=1
+  if (process.env.NODE_ENV === 'production' && String(url).startsWith('http://')) {
+    console.warn('[api] En producción, tu API debe usar HTTPS. Ajusta EXPO_PUBLIC_API_URL.');
+    if (process.env.EXPO_PUBLIC_FORCE_HTTPS === '1') {
+      try {
+        const u = new URL(url);
+        u.protocol = 'https:';
+        url = u.toString();
+      } catch {}
+    }
+  }
+  return url;
 }
 
 // Base URL efectiva (sin romper tus exports actuales)
@@ -68,7 +79,7 @@ async function req<T>(
 ): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (auth) {
-    const token = await AsyncStorage.getItem('token');
+    const token = await getSecureToken();
     if (token) headers.Authorization = `Bearer ${token}`;
   }
 
@@ -83,7 +94,9 @@ async function req<T>(
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      console.log('➡️ [api]', method, url, auth ? '(auth)' : '', body ?? '');
+      const isAuthPath = path.startsWith('/auth');
+      const safeBody = isAuthPath ? '[redacted]' : (body ?? '');
+      console.log('➡️ [api]', method, url, auth ? '(auth)' : '', safeBody);
 
       const res = await fetch(url, {
         method,
@@ -100,7 +113,8 @@ async function req<T>(
         data = raw; // HTML / texto plano
       }
 
-      console.log('⬅️ [api]', res.status, path, data);
+      const safeData = isAuthPath ? '[redacted]' : data;
+      console.log('⬅️ [api]', res.status, path, safeData);
 
       if (!res.ok) {
         // Si es 5xx y hay reintentos, reintenta

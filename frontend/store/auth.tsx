@@ -1,5 +1,6 @@
 // store/auth.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getToken as getSecureToken, setToken as setSecureToken, removeToken as removeSecureToken } from '../utils/secureStore';
 import React, {
   createContext,
   PropsWithChildren,
@@ -68,15 +69,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
   // Estado temporal (NO persistente) para confirmación de email
   const [pendingCreds, setPendingCreds] = useState<PendingCreds>(null);
 
-  // Bootstrap de sesión desde AsyncStorage
+  // Bootstrap de sesión leyendo token desde SecureStore (fallback a AsyncStorage)
   useEffect(() => {
     (async () => {
       try {
-        const [[, t], [, u], [, avatar]] = await AsyncStorage.multiGet([
-          'token',
+        const [[, u], [, avatar]] = await AsyncStorage.multiGet([
           'user',
           'avatar_uri',
         ]);
+        const t = await getSecureToken();
         setToken(t ?? null);
         const base = u ? normalizeUser(JSON.parse(u)) : null;
         const merged = base ? { ...base, avatar_uri: avatar ?? base.avatar_uri ?? null } : null;
@@ -111,7 +112,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const res = await api.login({ email, password });
     const tok = res.access_token;
     setToken(tok);
-    await AsyncStorage.setItem('token', tok);
+    await setSecureToken(tok);
 
     // Intentar perfil completo; si falla, usar res.user
     const me = await api.getProfile().catch(() => res.user ?? null);
@@ -140,7 +141,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setUser(null);
       setToken(null);
       setPendingCreds(null);
-      await AsyncStorage.multiRemove(['token', 'user', 'avatar_uri']);
+      await removeSecureToken();
+      await AsyncStorage.multiRemove(['user', 'avatar_uri']);
     }
   }, []);
 

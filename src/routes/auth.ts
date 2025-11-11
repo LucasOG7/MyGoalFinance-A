@@ -1,10 +1,26 @@
 // src/routes/auth.ts
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { supabase, supabaseAdmin } from '../supabase';
 import { registerSchema, loginSchema } from '../utils/validators';
 import { getAuthUserFromRequest } from '../utils/auth-helpers';
 
 const router = Router();
+
+// Limitadores específicos para rutas sensibles
+const loginLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutos
+  max: 10, // máx 10 intentos por IP
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const forgotLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  max: 5, // máx 5 por IP
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 /**
  * POST /auth/register
@@ -66,7 +82,7 @@ router.post('/register', async (req, res) => {
  * POST /auth/login
  * Devuelve { access_token, user } para que el front lo guarde.
  */
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json(parsed.error.flatten());
@@ -142,7 +158,7 @@ router.post('/logout', async (_req, res) => {
  * POST /auth/forgot
  * Envía email de recuperación con deep link (ajústalo si usas otro).
  */
-router.post('/forgot', async (req, res) => {
+router.post('/forgot', forgotLimiter, async (req, res) => {
   const email = (req.body?.email as string) ?? '';
   if (!email) return res.status(400).json({ detail: 'Email requerido' });
 

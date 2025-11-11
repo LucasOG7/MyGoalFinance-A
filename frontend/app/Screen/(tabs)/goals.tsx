@@ -341,17 +341,19 @@ export default function Goals() {
         {/* Formulario nueva meta */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Agregar nueva meta</Text>
+          <Text style={styles.inputLabel}>Nombre de la meta</Text>
           <TextInput
             style={styles.input}
             placeholder="Ej: Viaje a Europa"
-            placeholderTextColor="#999"
+            placeholderTextColor="#94a3b8"
             value={newGoal}
             onChangeText={setNewGoal}
           />
+          <Text style={styles.inputLabel}>Monto objetivo</Text>
           <TextInput
             style={styles.input}
             placeholder="Monto objetivo (CLP)"
-            placeholderTextColor="#999"
+            placeholderTextColor="#94a3b8"
             keyboardType="numeric"
             value={targetAmount}
             onChangeText={setTargetAmount}
@@ -442,7 +444,7 @@ export default function Goals() {
             <TextInput
               style={styles.input}
               placeholder="Ej: Viaje a Europa"
-              placeholderTextColor="#999"
+              placeholderTextColor="#94a3b8"
               value={editTitle}
               onChangeText={setEditTitle}
             />
@@ -451,7 +453,7 @@ export default function Goals() {
             <TextInput
               style={styles.input}
               placeholder="Monto objetivo (CLP)"
-              placeholderTextColor="#999"
+              placeholderTextColor="#94a3b8"
               keyboardType="numeric"
               value={editTarget}
               onChangeText={setEditTarget}
@@ -496,7 +498,7 @@ export default function Goals() {
             <TextInput
               style={styles.input}
               placeholder="Ej: 15000"
-              placeholderTextColor="#999"
+              placeholderTextColor="#94a3b8"
               value={customAmount}
               onChangeText={setCustomAmount}
               keyboardType="numeric"
