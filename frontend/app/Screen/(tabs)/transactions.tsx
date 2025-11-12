@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TextInput, TouchableOpacity, View, Platform } from 'react-native';
 import SafeKeyboardScreen from '../../../components/ui/SafeKeyboardScreen';
 import api from '../../../constants/api';
 import styles, { C } from '../../../Styles/transactionsStyles';
 import { useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Tx = {
   id: number;
@@ -29,6 +30,7 @@ const monthTitle = (d: Date) => {
 };
 
 export default function Transactions() {
+  const insets = useSafeAreaInsets();
   const { month: monthParam } = useLocalSearchParams<{ month?: string }>();
   // Mes "canónico" siempre día 1; inicializa desde `month` si viene en la ruta
   const [monthDate, setMonthDate] = useState<Date>(() => {
@@ -176,7 +178,7 @@ export default function Transactions() {
         <FlatList
           data={list}
           keyExtractor={(t) => String(t.id)}
-          contentContainerStyle={{ paddingBottom: 230 }}
+          contentContainerStyle={{ paddingBottom: (Platform.OS === 'ios' ? insets.bottom : 0) + 240 }}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -205,7 +207,7 @@ export default function Transactions() {
       )}
 
       {/* Formulario inferior */}
-      <View style={styles.formCard}>
+      <View style={[styles.formCard, { bottom: (Platform.OS === 'ios' ? insets.bottom : 8) }] }>
         <View style={styles.typeRow}>
           <TouchableOpacity
             onPress={() => setTType('income')}

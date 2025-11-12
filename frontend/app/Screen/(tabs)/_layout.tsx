@@ -57,7 +57,7 @@ export default function TabLayout() {
   }, [authToken]);
 
   const insets = useSafeAreaInsets();
-  const baseH = Platform.OS === 'android' ? 60 : 58;
+  const baseH = Platform.OS === 'android' ? 60 : (Platform.OS === 'web' ? 64 : 58);
 
   return (
     // Respetar status bar con fondo consistente
@@ -67,11 +67,12 @@ export default function TabLayout() {
         initialRouteName="home"
         screenOptions={{
           headerShown: false,
+          tabBarShowLabel: true,
           tabBarHideOnKeyboard: true,
           tabBarActiveTintColor: '#ffb300',
           tabBarInactiveTintColor: '#e2e8f0',
           tabBarLabelStyle: { 
-            fontSize: 12,
+            fontSize: 10,
             fontWeight: '700',
             marginTop: 4,
             color: '#ffffff',
@@ -80,23 +81,23 @@ export default function TabLayout() {
             textShadowRadius: 3,
           },
           tabBarIconStyle: {
-            marginBottom: 2,
+            marginBottom: 1,
           },
           tabBarItemStyle: {
-            paddingVertical: 4,
+            paddingVertical: 6,
           },
           tabBarStyle: {
-            backgroundColor: 'rgba(15, 23, 42, 0.92)',
-            borderTopColor: 'rgba(148, 163, 184, 0.3)',
+            backgroundColor: '#0f172a',
+            borderTopColor: '#0f172a',
             borderTopWidth: 1,
             height: baseH + insets.bottom,
-            paddingBottom: Math.max(6, insets.bottom),
-            paddingTop: 8,
+            paddingBottom: Math.max(8, insets.bottom),
+            paddingTop: 10,
             position: 'absolute',
             shadowColor: '#000',
             shadowOffset: { width: 0, height: -4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 12,
+            shadowOpacity: 0.25,
+            shadowRadius: 10,
             elevation: 10,
           },
         }}

@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Notifications from 'expo-notifications';
 import { useRouter, type Href } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -15,7 +15,10 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  View
+  View,
+  Animated,
+  Dimensions,
+  Easing
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import api from '../../../constants/api';
@@ -196,23 +199,21 @@ export default function Home() {
 
       </LinearGradient>
 
-      {/* Dropdowns anclados como overlay bajo el header */}
+      {/* Overlay de notificaciones a pantalla completa */}
       {notifOpen && (
-        <NotificationsDropdown
+        <NotificationsOverlay
           notifications={notifications}
           onClose={() => setNotifOpen(false)}
-          topOffset={headerH}
         />
       )}
       {menuOpen && (
-        <MenuDropdown
+        <MenuOverlay
           actionsOpen={actionsOpen}
           onToggleActions={() => setActionsOpen((v) => !v)}
           onProfile={() => router.push('/Screen/(tabs)/profile')}
           onSettings={() => router.push('/Screen/editprofile')}
           onLogout={onLogout}
           onClose={() => setMenuOpen(false)}
-          topOffset={headerH}
         />
       )}
 
@@ -273,11 +274,19 @@ export default function Home() {
 
         {/* Acciones rápidas */}
         <Text style={styles.sectionTitle}>Acciones rápidas</Text>
-        <View style={styles.quickRow}>
-          {QUICK_ACTIONS.map((a) => (
-            <QuickButton key={a.label} label={a.label} icon={a.icon} onPress={() => router.push(a.route)} />
-          ))}
-        </View>
+        {Dimensions.get('window').width < 430 ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickRow}>
+            {QUICK_ACTIONS.map((a) => (
+              <QuickButton key={a.label} label={a.label} icon={a.icon} wide onPress={() => router.push(a.route)} />
+            ))}
+          </ScrollView>
+        ) : (
+          <View style={styles.quickRow}>
+            {QUICK_ACTIONS.map((a) => (
+              <QuickButton key={a.label} label={a.label} icon={a.icon} onPress={() => router.push(a.route)} />
+            ))}
+          </View>
+        )}
 
         {/* Goals preview */}
         <Section
@@ -401,122 +410,210 @@ function RateCard({ title, value, hint }: { title: string; value?: number | null
   );
 }
 
-function QuickButton({ label, icon, onPress }: { label: string; icon: keyof typeof Ionicons.glyphMap; onPress: () => void }) {
+function QuickButton({ label, icon, onPress, wide }: { label: string; icon: keyof typeof Ionicons.glyphMap; onPress: () => void; wide?: boolean }) {
   return (
     <Pressable 
       onPress={onPress} 
       style={({ pressed }) => [
         styles.quickBtn,
+        wide && styles.quickBtnWide,
         pressed && { transform: [{ scale: 0.95 }], opacity: 0.8 }
       ]}
     >
       <Ionicons name={icon} size={22} color="#1f2738" />
-      <Text style={styles.quickTxt} numberOfLines={1} ellipsizeMode="tail">{label}</Text>
+      <Text style={styles.quickTxt}>{label}</Text>
     </Pressable>
   );
 }
 
 /* ------------------------------ Header dropdowns ------------------------------ */
-function NotificationsDropdown({ notifications, onClose, topOffset }: { notifications: Array<{ id: string; title: string; body?: string }>; onClose: () => void; topOffset: number }) {
+function NotificationsOverlay({ notifications, onClose }: { notifications: Array<{ id: string; title: string; body?: string }>; onClose: () => void }) {
+  const screenW = Dimensions.get('window').width;
+  const anim = useRef(new Animated.Value(screenW)).current;
+
+  useEffect(() => {
+    Animated.timing(anim, {
+      toValue: 0,
+      duration: 320,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [anim]);
+
+  const close = useCallback(() => {
+    Animated.timing(anim, {
+      toValue: screenW,
+      duration: 300,
+      easing: Easing.in(Easing.cubic),
+      useNativeDriver: true,
+    }).start(() => onClose());
+  }, [anim, screenW, onClose]);
+
   return (
-    <View style={[styles.dropdownWrap, { top: topOffset }] }>
-      <View style={styles.dropdownCard}>
-        <View style={styles.dropdownTop}>
-          <Text style={styles.dropdownTitle}>Notificaciones</Text>
-          <Pressable onPress={onClose} hitSlop={8}>
-            <Ionicons name="close" size={16} color="#cbd5e1" />
+    <Animated.View style={[styles.overlayWrap, { transform: [{ translateX: anim }] }] }>
+      <SafeAreaView style={styles.overlayCard} edges={['top', 'left', 'right']}>
+        <View style={styles.overlayTop}>
+          <View style={styles.dropdownChevronBtn} />
+          <Text style={[styles.dropdownTitle, styles.overlayTopTitle]}>Notificaciones</Text>
+          <Pressable onPress={close} hitSlop={8} style={styles.dropdownChevronBtn}>
+            <Ionicons name="close" size={18} color="#cbd5e1" />
           </Pressable>
         </View>
-        {notifications.length === 0 ? (
-          <View style={styles.dropdownEmpty}>
-            <Text style={styles.dropdownEmptyTxt}>No hay notificaciones</Text>
-          </View>
-        ) : (
-          notifications.slice(0, 6).map((n) => (
-            <View key={n.id} style={styles.dropdownItem}>
-              <View style={styles.dropdownIconWrap}>
-                <Ionicons name="notifications" size={14} color="#f59e0b" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.dropdownItemTitle} numberOfLines={1}>{n.title}</Text>
-                {!!n.body && (
-                  <Text style={styles.dropdownItemDesc} numberOfLines={1} ellipsizeMode="tail">{n.body}</Text>
-                )}
-              </View>
+        <ScrollView contentContainerStyle={styles.overlayContent}>
+          {notifications.length === 0 ? (
+            <View style={styles.dropdownEmpty}>
+              <Text style={styles.dropdownEmptyTxt}>No hay notificaciones</Text>
             </View>
-          ))
-        )}
-      </View>
-    </View>
+          ) : (
+            notifications.slice(0, 12).map((n) => (
+              <View key={n.id} style={styles.dropdownItem}>
+                <View style={styles.dropdownIconWrap}>
+                  <Ionicons name="notifications" size={18} color="#f59e0b" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.dropdownItemTitle} numberOfLines={1}>{n.title}</Text>
+                  {!!n.body && (
+                    <Text style={styles.dropdownItemDesc} numberOfLines={1} ellipsizeMode="tail">{n.body}</Text>
+                  )}
+                </View>
+              </View>
+            ))
+          )}
+          <View style={{ height: 24 }} />
+        </ScrollView>
+      </SafeAreaView>
+    </Animated.View>
   );
 }
 
-function MenuDropdown({ actionsOpen, onToggleActions, onProfile, onSettings, onLogout, onClose, topOffset }: {
+function MenuOverlay({ actionsOpen, onToggleActions, onProfile, onSettings, onLogout, onClose }: {
   actionsOpen: boolean;
   onToggleActions: () => void;
   onProfile: () => void;
   onSettings: () => void;
   onLogout: () => void;
   onClose: () => void;
-  topOffset: number;
 }) {
   const router = useRouter();
+  const screenW = Dimensions.get('window').width;
+  const anim = useRef(new Animated.Value(screenW)).current;
+  const submenuAnim = useRef(new Animated.Value(0)).current;
+  const [showSubmenu, setShowSubmenu] = useState(actionsOpen);
+
+  useEffect(() => {
+    Animated.timing(anim, {
+      toValue: 0,
+      duration: 320,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [anim]);
+
+  const close = useCallback(() => {
+    Animated.timing(anim, {
+      toValue: screenW,
+      duration: 300,
+      easing: Easing.in(Easing.cubic),
+      useNativeDriver: true,
+    }).start(() => onClose());
+  }, [anim, screenW, onClose]);
+
+  // Animación del submenú de Acciones rápidas (entrada y salida)
+  useEffect(() => {
+    if (actionsOpen) {
+      setShowSubmenu(true);
+      submenuAnim.setValue(0);
+      Animated.timing(submenuAnim, {
+        toValue: 1,
+        duration: 240,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(submenuAnim, {
+        toValue: 0,
+        duration: 220,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) setShowSubmenu(false);
+      });
+    }
+  }, [actionsOpen]);
+
   return (
-    <View style={[styles.dropdownWrap, { top: topOffset }] }>
-      <View style={styles.dropdownCard}>
-        <View style={styles.dropdownTop}>
-          <Text style={styles.dropdownTitle}>Menú</Text>
-          <Pressable onPress={onClose} hitSlop={8}>
-            <Ionicons name="close" size={16} color="#cbd5e1" />
+    <Animated.View style={[styles.overlayWrap, { transform: [{ translateX: anim }] }] }>
+      <SafeAreaView style={styles.overlayCard} edges={['top', 'left', 'right']}>
+        <View style={styles.overlayTop}>
+          <View style={styles.dropdownChevronBtn} />
+          <Text style={[styles.dropdownTitle, styles.overlayTopTitle]}>Menú</Text>
+          <Pressable onPress={close} hitSlop={8} style={styles.dropdownChevronBtn}>
+            <Ionicons name="close" size={18} color="#cbd5e1" />
           </Pressable>
         </View>
-        <Pressable style={styles.dropdownItem} onPress={onProfile}>
-          <View style={styles.dropdownIconWrap}><Ionicons name="person" size={14} color="#f59e0b" /></View>
-          <Text style={styles.dropdownItemTitle}>Mi perfil</Text>
-        </Pressable>
+        <ScrollView contentContainerStyle={styles.overlayContent}>
+          <Pressable style={styles.dropdownItem} onPress={onProfile}>
+        <View style={styles.dropdownIconWrap}><Ionicons name="person" size={18} color="#f59e0b" /></View>
+            <Text style={styles.dropdownItemTitle}>Mi perfil</Text>
+          </Pressable>
 
-        {/* Acciones rápidas con submenú */}
-        <View style={styles.dropdownItemRow}>
-          <Pressable
-            style={styles.dropdownLeft}
-            onPress={onToggleActions}
-            accessibilityRole="button"
-            accessibilityLabel="Alternar acciones rápidas"
-          >
-            <View style={styles.dropdownIconWrap}><Ionicons name="flash" size={14} color="#f59e0b" /></View>
-            <Text style={styles.dropdownItemTitle}>Acciones rápidas</Text>
-          </Pressable>
-          <Pressable
-            onPress={onToggleActions}
-            hitSlop={8}
-            style={styles.dropdownChevronBtn}
-            accessibilityRole="button"
-            accessibilityLabel={actionsOpen ? 'Cerrar submenú' : 'Abrir submenú'}
-          >
-            <Ionicons name={actionsOpen ? 'chevron-up' : 'chevron-down'} size={16} color="#cbd5e1" />
-          </Pressable>
-        </View>
-        {actionsOpen && (
-          <View style={styles.submenu}>
-            {QUICK_ACTIONS.map((a) => (
-              <Pressable key={a.label} style={styles.submenuItem} onPress={() => router.push(a.route)}>
-                <Ionicons name={a.icon} size={14} color="#cbd5e1" />
-                <Text style={styles.submenuText}>{a.label}</Text>
-              </Pressable>
-            ))}
+          {/* Acciones rápidas con submenú */}
+          <View style={styles.dropdownItemRow}>
+            <Pressable
+              style={styles.dropdownLeft}
+              onPress={onToggleActions}
+              accessibilityRole="button"
+              accessibilityLabel="Alternar acciones rápidas"
+            >
+        <View style={styles.dropdownIconWrap}><Ionicons name="flash" size={18} color="#f59e0b" /></View>
+              <Text style={styles.dropdownItemTitle}>Acciones rápidas</Text>
+            </Pressable>
+            <Pressable
+              onPress={onToggleActions}
+              hitSlop={8}
+              style={styles.dropdownChevronBtn}
+              accessibilityRole="button"
+              accessibilityLabel={actionsOpen ? 'Cerrar submenú' : 'Abrir submenú'}
+            >
+          <Ionicons name={actionsOpen ? 'chevron-up' : 'chevron-down'} size={18} color="#cbd5e1" />
+            </Pressable>
           </View>
-        )}
+          {showSubmenu && (
+            <Animated.View
+              style={[
+                styles.submenu,
+                {
+                  opacity: submenuAnim,
+                  transform: [
+                    {
+                      translateY: submenuAnim.interpolate({ inputRange: [0, 1], outputRange: [-8, 0] })
+                    }
+                  ],
+                },
+              ]}
+            >
+              {QUICK_ACTIONS.map((a) => (
+                <Pressable key={a.label} style={styles.submenuItem} onPress={() => router.push(a.route)}>
+                <Ionicons name={a.icon} size={18} color="#cbd5e1" />
+                  <Text style={styles.submenuText}>{a.label}</Text>
+                </Pressable>
+              ))}
+            </Animated.View>
+          )}
 
-        <Pressable style={styles.dropdownItem} onPress={onSettings}>
-          <View style={styles.dropdownIconWrap}><Ionicons name="settings" size={14} color="#f59e0b" /></View>
-          <Text style={styles.dropdownItemTitle}>Configuración</Text>
-        </Pressable>
-        <Pressable style={styles.dropdownItem} onPress={onLogout}>
-          <View style={styles.dropdownIconWrap}><Ionicons name="log-out" size={14} color="#f59e0b" /></View>
-          <Text style={styles.dropdownItemTitle}>Cerrar sesión</Text>
-        </Pressable>
-      </View>
-    </View>
+          <Pressable style={styles.dropdownItem} onPress={onSettings}>
+        <View style={styles.dropdownIconWrap}><Ionicons name="settings" size={18} color="#f59e0b" /></View>
+            <Text style={styles.dropdownItemTitle}>Configuración</Text>
+          </Pressable>
+          <Pressable style={styles.dropdownItem} onPress={onLogout}>
+        <View style={styles.dropdownIconWrap}><Ionicons name="log-out" size={18} color="#f59e0b" /></View>
+            <Text style={styles.dropdownItemTitle}>Cerrar sesión</Text>
+          </Pressable>
+
+          <View style={{ height: 24 }} />
+        </ScrollView>
+      </SafeAreaView>
+    </Animated.View>
   );
 }
 

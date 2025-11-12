@@ -117,7 +117,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 14,
     right: 14,
-    bottom: -20,
+    // Eleva el card por encima de la barra inferior y respeta plataformas
+    bottom: Platform.select({ ios: 8, android: 8, web: 16 }),
     backgroundColor: C.card,
     borderRadius: 16,
     padding: 14,
