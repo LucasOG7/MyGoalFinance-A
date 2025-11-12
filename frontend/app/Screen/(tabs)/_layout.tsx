@@ -116,19 +116,16 @@ export default function TabLayout() {
           options={{ title: t('Resumen'), tabBarIcon: ({ color, size, focused }) => <AnimatedTabIcon name="stats-chart-sharp" color={color} size={size} focused={focused} /> }}
         />
         <Tabs.Screen
-          name="recommendation"
-          options={{ title: t('Recomendaciones'), tabBarIcon: ({ color, size, focused }) => <AnimatedTabIcon name="sparkles-sharp" color={color} size={size} focused={focused} /> }}
-        />
-        <Tabs.Screen
-          name="dashboard"
-          options={{ title: t('Dashboard'), tabBarIcon: ({ color, size, focused }) => <AnimatedTabIcon name="analytics-sharp" color={color} size={size} focused={focused} /> }}
+          name="transactions"
+          options={{ title: t('Movimientos'), tabBarIcon: ({ color, size, focused }) => <AnimatedTabIcon name="swap-horizontal-outline" color={color} size={size} focused={focused} /> }}
         />
 
         {/* Rutas ocultas */}
         <Tabs.Screen name="profile" options={{ href: null }} />
         <Tabs.Screen name="chatbot" options={{ href: null }} />
         <Tabs.Screen name="goals" options={{ href: null }} />
-        <Tabs.Screen name="transactions" options={{ href: null }} />
+        <Tabs.Screen name="recommendation" options={{ href: null }} />
+        <Tabs.Screen name="dashboard" options={{ href: null }} />
       </Tabs>
       {/* Aviso de conectividad global sobre la barra de tabs */}
       <ConnectivityBanner bottomOffset={baseH + Math.max(6, insets.bottom) + 6} />

@@ -2,7 +2,8 @@
 import styles from '@/Styles/homeStyles';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import * as Notifications from 'expo-notifications';
+import { useRouter, type Href } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -43,10 +44,18 @@ function mapGoalUI(g: any): GoalUI {
   };
 }
 
+// Lista común de Acciones rápidas (Home y menú)
+const QUICK_ACTIONS: { label: string; icon: keyof typeof Ionicons.glyphMap; route: Href }[] = [
+  { label: 'Chatbot', icon: 'chatbox-ellipses', route: '/Screen/(tabs)/chatbot' },
+  { label: 'Metas', icon: 'flag', route: '/Screen/(tabs)/goals' },
+  { label: 'Recomendaciones', icon: 'sparkles-sharp', route: '/Screen/(tabs)/recommendation' },
+  { label: 'Dashboard', icon: 'analytics-sharp', route: '/Screen/(tabs)/dashboard' },
+];
+
 export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user, refreshMe } = useAuth();
+  const { user, refreshMe, logout } = useAuth();
   const [busy, setBusy] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   // Selector de año y datos para gráfico de barras (ingresos por mes)
@@ -59,6 +68,13 @@ export default function Home() {
   const [rates, setRates] = useState<Rates | null>(null);
   // ▼ metas ahora tipadas con GoalUI
   const [goals, setGoals] = useState<GoalUI[]>([]);
+
+  // Header UI states
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [actionsOpen, setActionsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Array<{ id: string; title: string; body?: string }>>([]);
+  const [headerH, setHeaderH] = useState(0);
 
   const firstName = useMemo(() => {
     const n = profile?.name || '';
@@ -106,6 +122,17 @@ export default function Home() {
     load();
   }, [load]);
 
+  // Suscripción a notificaciones para poblar el dropdown
+  useEffect(() => {
+    const sub = Notifications.addNotificationReceivedListener((n) => {
+      const id = String((n as any)?.request?.identifier ?? Date.now());
+      const title = (n as any)?.request?.content?.title ?? 'Notificación';
+      const body = (n as any)?.request?.content?.body ?? '';
+      setNotifications((arr) => [{ id, title, body }, ...arr].slice(0, 10));
+    });
+    return () => { sub.remove(); };
+  }, []);
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
@@ -117,29 +144,77 @@ export default function Home() {
     }
   }, [load, refreshMe]);
 
+  const onLogout = useCallback(async () => {
+    try {
+      await logout();
+      router.replace('/Screen/login');
+    } catch {}
+  }, [logout, router]);
+
   return (
     <SafeAreaView style={styles.safe} edges={['left', 'right']}>
       <StatusBar style="light" />
       {/* Header */}
-      <LinearGradient colors={['#2e3b55', '#1f2738']} style={styles.header}>
+      <LinearGradient colors={['#0f172a', '#0f172a']} style={styles.header} onLayout={(e) => setHeaderH(e.nativeEvent.layout.height)}>
         <View style={styles.headerContent}>
-          <View>
-            {/* <Text style={styles.brand}>MyGoalFinance</Text> */}
-            <Text style={styles.h1}>¡Hola {firstName}! </Text>
-            <Text style={styles.subtitle}>Tu panel de control financiero</Text>
+          {/* icono app + nombre usuario */}
+          <View style={styles.headerLeft}>
+            <Ionicons name="wallet" size={22} color="#f59e0b" style={styles.appIcon} />
+            <Text style={styles.h1} numberOfLines={1}>
+              {firstName || 'Usuario'}
+            </Text>
           </View>
-          {/* Profile Picture */}
-          <TouchableOpacity
-            onPress={() => router.push('/Screen/profile')}
-            style={styles.profileButton}
-          >
-            <Image
-              source={{ uri: avatarUri }}
-              style={styles.profileImage}
-            />
-          </TouchableOpacity>
+
+          {/* campana, menú, avatar */}
+          <View style={styles.headerRight}>
+            <Pressable
+              onPress={() => setNotifOpen((v) => !v)}
+              style={styles.iconBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Abrir notificaciones"
+            >
+              <Ionicons name="notifications-outline" size={18} color="#c8d0e3" />
+            </Pressable>
+
+            <Pressable
+              onPress={() => setMenuOpen((v) => !v)}
+              style={styles.iconBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Abrir menú"
+            >
+              <Ionicons name="ellipsis-vertical" size={18} color="#c8d0e3" />
+            </Pressable>
+
+            <TouchableOpacity
+              onPress={() => router.push('/Screen/profile')}
+              style={styles.profileButton}
+            >
+              <Image source={{ uri: avatarUri }} style={styles.profileImage} />
+            </TouchableOpacity>
+          </View>
         </View>
+
       </LinearGradient>
+
+      {/* Dropdowns anclados como overlay bajo el header */}
+      {notifOpen && (
+        <NotificationsDropdown
+          notifications={notifications}
+          onClose={() => setNotifOpen(false)}
+          topOffset={headerH}
+        />
+      )}
+      {menuOpen && (
+        <MenuDropdown
+          actionsOpen={actionsOpen}
+          onToggleActions={() => setActionsOpen((v) => !v)}
+          onProfile={() => router.push('/Screen/(tabs)/profile')}
+          onSettings={() => router.push('/Screen/editprofile')}
+          onLogout={onLogout}
+          onClose={() => setMenuOpen(false)}
+          topOffset={headerH}
+        />
+      )}
 
       {/* Content */}
       <ScrollView
@@ -150,8 +225,14 @@ export default function Home() {
         ]}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        
-        {/* Dashboard Principal - Ingresos por mes */}
+        {/* KPIs (primero visible) */}
+        <View style={styles.row}>
+          <KpiCard label="Ingresos" value={sum?.inc ?? 0} color="#26c281" icon="arrow-up-circle" />
+          <KpiCard label="Gastos" value={sum?.exp ?? 0} color="#ff5a5f" icon="arrow-down-circle" />
+          <KpiCard label="Neto" value={sum?.net ?? 0} color="#4dabf7" icon="wallet" />
+        </View>
+
+        {/* Gráfico: Ingresos por mes (debajo de KPIs) */}
         <View style={styles.dashboardCard}>
           <View style={styles.yearSelector}>
             <TouchableOpacity
@@ -190,28 +271,12 @@ export default function Home() {
           </View>
         </View>
 
-      {/* Acciones rápidas */}
-      <Text style={styles.sectionTitle}>Acciones rápidas</Text>
-      <View style={styles.quickRow}>
-        <QuickButton label="Añadir movimiento" icon="add-circle" onPress={() => router.push('/Screen/(tabs)/transactions')} />
-        <QuickButton label="Chatbot" icon="chatbox-ellipses" onPress={() => router.push('/Screen/(tabs)/chatbot')} />
-        <QuickButton label="Metas" icon="flag" onPress={() => router.push('/Screen/(tabs)/goals')} />
-      </View>
-
-
-
-      {/* {Rates} */}
-      <View style={styles.row}>
-        <RateCard title="Dólar (USD):" value={rates?.usd} hint="1 CLP → USD" />
-        <RateCard title="Euro (EUR):" value={rates?.eur} hint="1 CLP → EUR" />
-        <RateCard title="UF:" value={rates?.uf} hint={rates ? `Fecha: ${new Date(rates.updatedAt).toLocaleDateString()}` : ''} />
-      </View>
-
-        {/* KPIs */}
-        <View style={styles.row}>
-          <KpiCard label="Ingresos" value={sum?.inc ?? 0} color="#26c281" icon="arrow-up-circle" />
-          <KpiCard label="Gastos" value={sum?.exp ?? 0} color="#ff5a5f" icon="arrow-down-circle" />
-          <KpiCard label="Neto" value={sum?.net ?? 0} color="#4dabf7" icon="wallet" />
+        {/* Acciones rápidas */}
+        <Text style={styles.sectionTitle}>Acciones rápidas</Text>
+        <View style={styles.quickRow}>
+          {QUICK_ACTIONS.map((a) => (
+            <QuickButton key={a.label} label={a.label} icon={a.icon} onPress={() => router.push(a.route)} />
+          ))}
         </View>
 
         {/* Goals preview */}
@@ -247,6 +312,15 @@ export default function Home() {
               );
             })
           )}
+        </Section>
+
+        {/* Tipos de cambio (último) */}
+        <Section title="Tipos de cambio">
+          <View style={styles.row}>
+            <RateCard title="Dólar (USD):" value={rates?.usd} hint="1 CLP → USD" />
+            <RateCard title="Euro (EUR):" value={rates?.eur} hint="1 CLP → EUR" />
+            <RateCard title="UF:" value={rates?.uf} hint={rates ? `Fecha: ${new Date(rates.updatedAt).toLocaleDateString()}` : ''} />
+          </View>
         </Section>
 
         {/* Bottom padding para tabs */}
@@ -337,8 +411,112 @@ function QuickButton({ label, icon, onPress }: { label: string; icon: keyof type
       ]}
     >
       <Ionicons name={icon} size={22} color="#1f2738" />
-      <Text style={styles.quickTxt}>{label}</Text>
+      <Text style={styles.quickTxt} numberOfLines={1} ellipsizeMode="tail">{label}</Text>
     </Pressable>
+  );
+}
+
+/* ------------------------------ Header dropdowns ------------------------------ */
+function NotificationsDropdown({ notifications, onClose, topOffset }: { notifications: Array<{ id: string; title: string; body?: string }>; onClose: () => void; topOffset: number }) {
+  return (
+    <View style={[styles.dropdownWrap, { top: topOffset }] }>
+      <View style={styles.dropdownCard}>
+        <View style={styles.dropdownTop}>
+          <Text style={styles.dropdownTitle}>Notificaciones</Text>
+          <Pressable onPress={onClose} hitSlop={8}>
+            <Ionicons name="close" size={16} color="#cbd5e1" />
+          </Pressable>
+        </View>
+        {notifications.length === 0 ? (
+          <View style={styles.dropdownEmpty}>
+            <Text style={styles.dropdownEmptyTxt}>No hay notificaciones</Text>
+          </View>
+        ) : (
+          notifications.slice(0, 6).map((n) => (
+            <View key={n.id} style={styles.dropdownItem}>
+              <View style={styles.dropdownIconWrap}>
+                <Ionicons name="notifications" size={14} color="#f59e0b" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.dropdownItemTitle} numberOfLines={1}>{n.title}</Text>
+                {!!n.body && (
+                  <Text style={styles.dropdownItemDesc} numberOfLines={1} ellipsizeMode="tail">{n.body}</Text>
+                )}
+              </View>
+            </View>
+          ))
+        )}
+      </View>
+    </View>
+  );
+}
+
+function MenuDropdown({ actionsOpen, onToggleActions, onProfile, onSettings, onLogout, onClose, topOffset }: {
+  actionsOpen: boolean;
+  onToggleActions: () => void;
+  onProfile: () => void;
+  onSettings: () => void;
+  onLogout: () => void;
+  onClose: () => void;
+  topOffset: number;
+}) {
+  const router = useRouter();
+  return (
+    <View style={[styles.dropdownWrap, { top: topOffset }] }>
+      <View style={styles.dropdownCard}>
+        <View style={styles.dropdownTop}>
+          <Text style={styles.dropdownTitle}>Menú</Text>
+          <Pressable onPress={onClose} hitSlop={8}>
+            <Ionicons name="close" size={16} color="#cbd5e1" />
+          </Pressable>
+        </View>
+        <Pressable style={styles.dropdownItem} onPress={onProfile}>
+          <View style={styles.dropdownIconWrap}><Ionicons name="person" size={14} color="#f59e0b" /></View>
+          <Text style={styles.dropdownItemTitle}>Mi perfil</Text>
+        </Pressable>
+
+        {/* Acciones rápidas con submenú */}
+        <View style={styles.dropdownItemRow}>
+          <Pressable
+            style={styles.dropdownLeft}
+            onPress={onToggleActions}
+            accessibilityRole="button"
+            accessibilityLabel="Alternar acciones rápidas"
+          >
+            <View style={styles.dropdownIconWrap}><Ionicons name="flash" size={14} color="#f59e0b" /></View>
+            <Text style={styles.dropdownItemTitle}>Acciones rápidas</Text>
+          </Pressable>
+          <Pressable
+            onPress={onToggleActions}
+            hitSlop={8}
+            style={styles.dropdownChevronBtn}
+            accessibilityRole="button"
+            accessibilityLabel={actionsOpen ? 'Cerrar submenú' : 'Abrir submenú'}
+          >
+            <Ionicons name={actionsOpen ? 'chevron-up' : 'chevron-down'} size={16} color="#cbd5e1" />
+          </Pressable>
+        </View>
+        {actionsOpen && (
+          <View style={styles.submenu}>
+            {QUICK_ACTIONS.map((a) => (
+              <Pressable key={a.label} style={styles.submenuItem} onPress={() => router.push(a.route)}>
+                <Ionicons name={a.icon} size={14} color="#cbd5e1" />
+                <Text style={styles.submenuText}>{a.label}</Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
+
+        <Pressable style={styles.dropdownItem} onPress={onSettings}>
+          <View style={styles.dropdownIconWrap}><Ionicons name="settings" size={14} color="#f59e0b" /></View>
+          <Text style={styles.dropdownItemTitle}>Configuración</Text>
+        </Pressable>
+        <Pressable style={styles.dropdownItem} onPress={onLogout}>
+          <View style={styles.dropdownIconWrap}><Ionicons name="log-out" size={14} color="#f59e0b" /></View>
+          <Text style={styles.dropdownItemTitle}>Cerrar sesión</Text>
+        </Pressable>
+      </View>
+    </View>
   );
 }
 

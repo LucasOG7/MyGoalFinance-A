@@ -1,25 +1,48 @@
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#141a26', paddingTop: 0 },
+  safe: { flex: 1, backgroundColor: '#0f172a', paddingTop: 0 },
   header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16 },
   headerContent: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
-    alignItems: 'flex-start'
+    alignItems: 'center',
   },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 1 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   brand: { color: '#e8edf7', fontWeight: '700', fontSize: 18, marginBottom: 6 },
-  h1: { color: 'white', fontSize: 28, fontWeight: '800', marginTop: 8 },
+  h1: { color: 'white', fontSize: 28, fontWeight: '800', marginTop: 0 },
   subtitle: { color: '#c8d0e3', marginTop: 4 },
 
-  // Profile Picture Styles
+  // Logo provisorio e íconos del header
+  logoBox: {
+    // Eliminado el contorno: sin fondo ni borde
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  appIcon: { marginRight: 4 },
+  iconBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2a3441',
+    borderWidth: 1,
+    borderColor: '#3a4553',
+  },
+
+  // Estilos foto de perfil
   profileButton: {
-    marginTop: 8,
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     borderWidth: 2,
     borderColor: 'transparent',
   },
@@ -105,20 +128,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f59e0b',
     borderRadius: 12,
-    padding: 16,
+    padding: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 4,
     shadowColor: '#f59e0b',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 6,
   },
   quickTxt: { 
     color: '#1f2738', 
     fontWeight: '800',
-    fontSize: 14,
+    fontSize: 12,
     textAlign: 'center',
   },
 
@@ -140,6 +163,69 @@ const styles = StyleSheet.create({
   empty: { backgroundColor: '#1f2738', borderRadius: 14, padding: 14 },
   emptyTxt: { color: '#9aa7bf' },
 
+  // Dropdowns anclados en el header
+  dropdownWrap: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    top: 0,
+    zIndex: 1000,
+  },
+  dropdownCard: {
+    backgroundColor: '#1f2738',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2a3441',
+    padding: 12,
+  },
+  dropdownTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  dropdownTitle: { color: '#e2e8f0', fontWeight: '700' },
+  dropdownEmpty: { paddingVertical: 12, alignItems: 'center' },
+  dropdownEmptyTxt: { color: '#94a3b8' },
+  dropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 8,
+  },
+  dropdownIconWrap: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2a3441',
+  },
+  dropdownItemTitle: { color: '#e2e8f0', fontWeight: '700' },
+  dropdownItemDesc: { color: '#94a3b8', marginTop: 2 },
+  dropdownItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+  },
+  dropdownLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
+  dropdownChevronBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  submenu: { marginLeft: 28, gap: 8, marginTop: 6 },
+  submenuItem: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8 },
+  submenuText: { color: '#cbd5e1', fontWeight: '600' },
+
   // Estilos gráficos de barra
   barChartWrap: { marginTop: 8 },
   barScroll: { marginTop: 6 },
@@ -153,7 +239,7 @@ const styles = StyleSheet.create({
   yearSelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     gap: 8,
     marginBottom: 8,
   },

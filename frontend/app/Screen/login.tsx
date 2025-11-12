@@ -126,9 +126,9 @@ export default function Login() {
             }} />
           </View>
 
-          {/* Contenido del modal con z-index superior */}
+          {/* Contenido del modal */}
           <View style={{ position: 'relative', zIndex: 10 }}>
-            {/* Icono de wallet centrado */}
+            {/* Icono de wallet */}
             <View style={{ alignItems: 'center', marginBottom: 20 }}>
               <Ionicons name="wallet" size={60} color="#f5a623" />
             </View>
