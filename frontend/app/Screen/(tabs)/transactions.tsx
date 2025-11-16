@@ -207,7 +207,10 @@ export default function Transactions() {
       )}
 
       {/* Formulario inferior */}
-      <View style={[styles.formCard, { bottom: (Platform.OS === 'ios' ? insets.bottom : 8) }] }>
+      <View style={[
+        styles.formCard,
+        { bottom: Platform.OS === 'ios' ? insets.bottom + -65 + 6 : 8 }
+      ] }>
         <View style={styles.typeRow}>
           <TouchableOpacity
             onPress={() => setTType('income')}

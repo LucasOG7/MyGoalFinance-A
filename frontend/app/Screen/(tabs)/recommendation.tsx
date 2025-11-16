@@ -17,6 +17,7 @@ import api from "../../../constants/api";
 import { useAuth } from "../../../store/auth";
 import recommendationStyles from "../../../Styles/recommendationStyles";
 import { Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 type Rec = { id: string | number; title: string; description: string };
 
@@ -206,12 +207,18 @@ export default function Recommendation() {
   return (
     <SafeKeyboardScreen 
       withTabBarPadding={true} 
-      bg="#2e3b55"
+      bg="#0f172a"
       extraBottomPad={Platform.OS === 'ios' ? -40 : 0}
       paddingTop={-20}
     >
-      <LinearGradient colors={["#2e3b55", "#1f2738"]} style={{ flex: 1 }}>
+      <LinearGradient colors={["#0f172a", "#0f172a"]} style={{ flex: 1 }}>
         <View style={{ paddingHorizontal: 20, paddingTop: 0, flex: 1 }}>
+          <View style={recommendationStyles.headerRow}>
+            <TouchableOpacity style={recommendationStyles.backButton} onPress={() => router.replace('/Screen/(tabs)/home')}>
+              <Ionicons name="arrow-back" size={20} color="#fff" />
+            </TouchableOpacity>
+            <View style={{ width: 36 }} />
+          </View>
           <View style={recommendationStyles.headerWrap}>
             <Text style={recommendationStyles.title}>Recomendaciones</Text>
             <Text style={recommendationStyles.subtitle}>Basadas en tu perfil y objetivos.</Text>

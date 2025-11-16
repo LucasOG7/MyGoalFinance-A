@@ -4,22 +4,38 @@ const recommendationStyles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 20 },
   headerWrap: { marginTop: -4, zIndex: 2 },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
 
   title: {
     fontSize: 26,
     fontWeight: "800",
     color: "#ffffff",
     marginBottom: 6,
-    textAlign: "left",
+    textAlign: "center",
   },
-  subtitle: { fontSize: 14, color: "#cbd5e1", marginBottom: 16, textAlign: "left" },
+  subtitle: { fontSize: 14, color: "#cbd5e1", marginBottom: 16, textAlign: "center" },
 
   levelRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
     marginBottom: 12,
+    alignSelf: 'center',
+    flexWrap: 'wrap',
   },
   levelChip: {
     backgroundColor: '#2a3441',

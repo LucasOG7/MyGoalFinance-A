@@ -168,7 +168,7 @@ export default function Profile() {
   };
 
   return (
-    <LinearGradient colors={["#2e3b55", "#1f2738"]} style={styles.container}>
+    <LinearGradient colors={["#0f172a", "#0f172a"]} style={styles.container}>
       {/* Encabezado superior */}
       <View style={styles.headerTop}>
         <Text style={styles.headerTitle}>Mi Perfil</Text>

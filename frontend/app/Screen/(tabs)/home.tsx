@@ -20,6 +20,7 @@ import {
   Dimensions,
   Easing
 } from 'react-native';
+import type { ColorValue } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import api from '../../../constants/api';
 import { useAuth } from '../../../store/auth';
@@ -367,6 +368,7 @@ function buildMonthlyIncome(txs: any[], year: number): { label: string; value: n
 function BarChart({ data, onBarPress }: { data: { label: string; value: number; ym?: string }[]; onBarPress?: (ym: string) => void }) {
   const max = Math.max(...(data?.map((d) => d.value) ?? [0]), 1);
   const MAX_H = 140;
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
   return (
     <ScrollView
       horizontal
@@ -376,12 +378,34 @@ function BarChart({ data, onBarPress }: { data: { label: string; value: number; 
     >
       {(data ?? []).map((d, idx) => {
         const h = Math.round((d.value / max) * MAX_H);
+        const gradientColors: readonly [ColorValue, ColorValue] = activeIdx === idx
+          ? ['rgba(38, 194, 129, 0.55)', 'rgba(38, 194, 129, 1)']
+          : ['rgba(38, 194, 129, 0.33)', 'rgba(38, 194, 129, 1)'];
         return (
-          <TouchableOpacity key={idx} style={styles.barItem} onPress={() => d.ym && onBarPress?.(d.ym)}>
-            <View style={[styles.bar, { height: h }]} />
+          <Pressable
+            key={idx}
+            style={styles.barItem}
+            onPress={() => d.ym && onBarPress?.(d.ym)}
+            onPressIn={() => setActiveIdx(idx)}
+            onPressOut={() => setActiveIdx(null)}
+          >
+            <View style={[styles.bar, { height: h }] }>
+              <LinearGradient
+                colors={gradientColors}
+                start={[0, 1] as [number, number]}
+                end={[0, 0] as [number, number]}
+                style={{ flex: 1 }}
+              />
+            </View>
             <Text style={styles.barValue}>{formatCLP(d.value)}</Text>
             <Text style={styles.barLabel}>{d.label}</Text>
-          </TouchableOpacity>
+            {activeIdx === idx && (
+              <View style={styles.barTooltip}>
+                <Text style={styles.barTooltipTxt}>{formatCLP(d.value)}</Text>
+                <Text style={styles.barTooltipSub}>{d.label} {d?.ym?.slice(0, 4) ?? ''}</Text>
+              </View>
+            )}
+          </Pressable>
         );
       })}
     </ScrollView>
@@ -389,14 +413,28 @@ function BarChart({ data, onBarPress }: { data: { label: string; value: number; 
 }
 
 function KpiCard({ label, value, color, icon }: { label: string; value: number; color: string; icon: keyof typeof Ionicons.glyphMap }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const pressIn = () => Animated.spring(scale, { toValue: 0.98, useNativeDriver: true }).start();
+  const pressOut = () => Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start();
+
   return (
-    <View style={styles.kpi}>
-      <View style={[styles.kpiIconWrap, { backgroundColor: color + '22' }]}>
-        <Ionicons name={icon} size={20} color={color} />
-      </View>
-      <Text style={styles.kpiLabel}>{label}</Text>
-      <Text style={[styles.kpiValue, { color }]}>{formatCLP(value)}</Text>
-    </View>
+    <Pressable onPressIn={pressIn} onPressOut={pressOut} style={{ flex: 1 }}>
+      <Animated.View style={[styles.kpi, { transform: [{ scale }] }] }>
+        {/* Fondo elegante con sheen sutil del color del KPI */}
+        <LinearGradient
+          colors={[color + '22', 'transparent']}
+          start={[0, 0] as [number, number]}
+          end={[1, 1] as [number, number]}
+          style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+          pointerEvents="none"
+        />
+        <View style={[styles.kpiIconWrap, { backgroundColor: color + '22' }] }>
+          <Ionicons name={icon} size={20} color={color} />
+        </View>
+        <Text style={styles.kpiLabel}>{label}</Text>
+        <Text style={[styles.kpiValue, { color }]}>{formatCLP(value)}</Text>
+      </Animated.View>
+    </Pressable>
   );
 }
 

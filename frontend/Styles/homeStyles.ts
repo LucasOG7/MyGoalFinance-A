@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#0f172a', paddingTop: 0 },
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
 
   // Dashboard Card Styles (similar to reference image)
   dashboardCard: {
-    backgroundColor: '#1f2738',
+    backgroundColor: '#0f172a99',
     borderRadius: 16,
     padding: 20,
     position: 'relative',
@@ -110,9 +110,10 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 12 },
   kpi: {
     flex: 1,
-    backgroundColor: '#1f2738',
+    backgroundColor: '#111827',
     borderRadius: 16,
     padding: 12,
+    overflow: 'hidden', // el gradiente respeta los bordes redondeados
   },
   kpiIconWrap: { width: 28, height: 28, borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
   kpiLabel: { color: '#aab4c6' },
@@ -247,8 +248,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 12,
+    paddingTop: Platform.OS === 'ios' ? 0 : 8,
+    paddingBottom: Platform.OS === 'ios' ? 2 : 12,
+    marginTop: Platform.OS === 'ios' ? -28 : 0,
   },
   overlayTopTitle: {
     flex: 1,
@@ -267,10 +269,29 @@ const styles = StyleSheet.create({
   barChartWrap: { marginTop: 8 },
   barScroll: { marginTop: 6 },
   barChartRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 12, paddingVertical: 8 },
-  barItem: { alignItems: 'center', minWidth: 56 },
-  bar: { width: 28, backgroundColor: '#f59e0b', borderRadius: 8 },
+  barItem: { alignItems: 'center', minWidth: 56, position: 'relative' },
+  bar: { width: 28, backgroundColor: 'transparent', borderRadius: 8, overflow: 'hidden', borderWidth: 1, borderColor: '#243044' },
   barLabel: { color: '#aab4c6', marginTop: 6, fontSize: 12 },
   barValue: { color: '#94a3b8', fontSize: 10, marginBottom: 4 },
+  barTooltip: {
+    position: 'absolute',
+    bottom: '100%',
+    marginBottom: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: '#0b1220',
+    borderWidth: 1,
+    borderColor: '#243044',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  },
+  barTooltipTxt: { color: '#e5e7eb', fontWeight: '700', fontSize: 12 },
+  barTooltipSub: { color: '#94a3b8', fontWeight: '600', fontSize: 11 },
 
   // Year selector styles
   yearSelector: {
@@ -285,9 +306,12 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 16,
     backgroundColor: '#2a3441',
+    borderWidth: 1,
+    borderColor: '#243044',
   },
   yearBtnActive: {
     backgroundColor: '#3a4553',
+    borderColor: '#4b5563',
   },
   yearBtnTxt: {
     color: '#c8d0e3',
@@ -300,6 +324,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#2a3441',
+    borderWidth: 1,
+    borderColor: '#243044',
   },
   yearArrowTxt: { color: '#c8d0e3', fontWeight: '700' },
 });

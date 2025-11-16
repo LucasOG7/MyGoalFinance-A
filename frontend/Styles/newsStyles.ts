@@ -2,10 +2,10 @@ import { StyleSheet } from 'react-native';
 
 // Paleta de colores consistente con la aplicación
 const palette = {
-  bg: '#2f3b52',
-  card: 'rgba(255,255,255,0.08)',
-  cardAlt: 'rgba(255,255,255,0.12)',
-  border: 'rgba(255,255,255,0.14)',
+  bg: '#0f172a',
+  card: '#1f2738',
+  cardAlt: '#1f2738',
+  border: 'rgba(148,163,184,0.24)',
   textPrimary: '#F8FAFC',
   textMuted: '#CBD5E1',
   brand: '#f59e0b', // Color de acento principal

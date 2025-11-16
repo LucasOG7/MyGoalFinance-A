@@ -321,7 +321,14 @@ export default function Goals() {
   };
 
   return (
-    <LinearGradient colors={['#2e3b55', '#1f2738']} style={styles.container}>
+    <LinearGradient colors={['#0f172a', '#0f172a']} style={styles.container}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 12 }}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.replace('/Screen/(tabs)/home')}>
+          <Ionicons name="arrow-back" size={20} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Mis Metas Financieras</Text>
+        <View style={{ width: 36 }} />
+      </View>
       <ScrollView 
         contentContainerStyle={styles.content}
         refreshControl={
@@ -333,7 +340,6 @@ export default function Goals() {
           />
         }
       >
-        <Text style={styles.title}>Mis Metas Financieras</Text>
         <Text style={styles.subtitle}>
           Define, visualiza y sigue el progreso de tus objetivos.
         </Text>

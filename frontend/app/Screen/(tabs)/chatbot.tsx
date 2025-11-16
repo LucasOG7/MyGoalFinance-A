@@ -3,6 +3,7 @@ import styles from '@/Styles/chatbotStyles';
 import { getToken as getSecureToken } from '../../../utils/secureStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -277,16 +278,16 @@ export default function Chatbot() {
   return (
     <SafeAreaView
       edges={[]}
-      style={{ flex: 1, backgroundColor: '#1f2738', paddingTop: 0 }}
+      style={{ flex: 1, backgroundColor: '#0f172a', paddingTop: 0 }}
     >
       {/* Header */}
-      <LinearGradient colors={['#2b344a', '#1f2738']} style={styles.container}>
+      <LinearGradient colors={['#0f172a', '#0f172a']} style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={() => router.replace('/Screen/(tabs)/home')}
           >
-            <Text style={styles.backButtonText}>←</Text>
+            <Ionicons name="arrow-back" size={20} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.title}>Asistente Financiero</Text>
           <View style={{ width: 36 }} />

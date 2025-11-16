@@ -19,6 +19,8 @@ import {
 } from 'victory-native';
 import api from '../../../constants/api';
 import styles, { palette, vxAxis, vxLabel } from '../../../Styles/dashboardStyles';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 type Tx = {
   id: number;
@@ -84,6 +86,7 @@ const pieRadius = Math.min(chartW, pieH) / 2 - 20;
 
 /* ------------------ componente ------------------ */
 export default function Dashboard() {
+  const router = useRouter();
   const [month, setMonth] = useState<string>(() => dateToYM());
   const [busy, setBusy] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -225,9 +228,14 @@ export default function Dashboard() {
         />
       }
     >
-      {/* Título Dashboard */}
-      <Text style={styles.dashboardTitle}>Dashboard</Text>
-      
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <TouchableOpacity style={[styles.navBtn, { backgroundColor: 'transparent', borderWidth: 0 }]} onPress={() => router.replace('/Screen/(tabs)/home')}>
+          <Ionicons name="arrow-back" size={20} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Dashboard</Text>
+        <View style={{ width: 36 }} />
+      </View>
+
       {/* Header con mes */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.navBtn} onPress={() => setMonth((m) => nextYM(m, -1))}>

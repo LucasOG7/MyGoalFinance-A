@@ -3,10 +3,10 @@ import { Platform, StyleSheet } from 'react-native';
 
 export const C = {
   // Base oscura
-  bg1: '#2f3b52',
+  bg1: '#0f172a',
   bg2: '#1f2738',
   card: '#1f2738', 
-  border: 'rgba(255,255,255,0.14)',
+  border: 'rgba(148,163,184,0.24)',
 
   // Texto
   text: '#F8FAFC',
@@ -33,7 +33,7 @@ export const C = {
 
   // Inputs
   inputBg: 'rgba(255,255,255,0.08)',
-  inputBorder: 'rgba(255,255,255,0.14)',
+  inputBorder: 'rgba(148,163,184,0.24)',
   inputFocus: '#2563EB',
 };
 
