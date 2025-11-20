@@ -648,6 +648,15 @@ function MenuOverlay({ actionsOpen, onToggleActions, onProfile, onSettings, onLo
             <Text style={styles.dropdownItemTitle}>Cerrar sesión</Text>
           </Pressable>
 
+          <View style={styles.supportCard}>
+            <View style={styles.dropdownIconWrap}><Ionicons name="call" size={18} color="#f59e0b" /></View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.supportTitle}>Soporte y Reclamos</Text>
+              <Text style={styles.supportNumber}>+569 111 111 111</Text>
+              <Text style={styles.supportHint}>Lunes a Viernes, 08:00 a 18:00</Text>
+            </View>
+          </View>
+
           <View style={{ height: 24 }} />
         </ScrollView>
       </SafeAreaView>

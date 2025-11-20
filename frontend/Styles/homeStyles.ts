@@ -265,6 +265,20 @@ const styles = StyleSheet.create({
   submenuItem: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 },
   submenuText: { color: '#cbd5e1', fontWeight: '600', fontSize: 15 },
 
+  supportCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#1f2738',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2a3441',
+    padding: 12,
+  },
+  supportTitle: { color: '#e2e8f0', fontWeight: '700', fontSize: 16 },
+  supportNumber: { color: '#f59e0b', fontWeight: '800', fontSize: 18 },
+  supportHint: { color: '#94a3b8', fontSize: 12 },
+
   // Estilos gráficos de barra
   barChartWrap: { marginTop: 8 },
   barScroll: { marginTop: 6 },
