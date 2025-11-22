@@ -74,7 +74,7 @@ function mapApiToUI(g: ApiGoal): GoalUI {
 // ------------------------------
 export default function Goals() {
   const router = useRouter();
-  const { token } = useAuth();
+  const { token, motivation, refreshMotivation } = useAuth();
 
   const [goals, setGoals] = useState<GoalUI[]>([]);
   const [loading, setLoading] = useState(false);
@@ -93,6 +93,12 @@ export default function Goals() {
   const [customContributionModalVisible, setCustomContributionModalVisible] = useState(false);
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
   const [customAmount, setCustomAmount] = useState('');
+
+  // Historial de metas completadas
+  const [historyOpen, setHistoryOpen] = useState(false);
+
+  const activeGoals = goals.filter((g) => g.current < g.target);
+  const completedGoals = goals.filter((g) => g.current >= g.target);
 
   // GET /api/goals
   const fetchGoals = useCallback(async () => {
@@ -119,6 +125,10 @@ export default function Goals() {
   useEffect(() => {
     fetchGoals();
   }, [fetchGoals]);
+
+  useEffect(() => {
+    refreshMotivation?.().catch(() => {});
+  }, [refreshMotivation]);
 
   // Pull-to-refresh handler
   const onRefresh = useCallback(async () => {
@@ -176,6 +186,15 @@ export default function Goals() {
   // POST /api/goals/:id/contribute
   const handleAddContribution = async (goalId: string, amount: number) => {
     if (!token) return Alert.alert('Sesión', 'Debes iniciar sesión.');
+    const goal = goals.find((g) => g.id === goalId);
+    const remaining = goal ? Math.max(goal.target - goal.current, 0) : 0;
+    if (remaining <= 0) {
+      return Alert.alert('Meta completada', 'Esta meta ya está completada.');
+    }
+    const useAmount = Math.min(Math.max(Number(amount) || 0, 0), remaining);
+    if (useAmount <= 0) {
+      return Alert.alert('Cantidad inválida', 'La cantidad ingresada no es válida.');
+    }
     try {
       const res = await fetch(`${GOALS_URL}/${goalId}/contribute`, {
         method: 'POST',
@@ -183,7 +202,7 @@ export default function Goals() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ amount }),
+        body: JSON.stringify({ amount: useAmount }),
       });
       const txt = await res.text();
       console.log('[api] POST /goals/:id/contribute ->', res.status, txt);
@@ -304,14 +323,21 @@ export default function Goals() {
       return;
     }
 
+    const goal = goals.find((g) => g.id === selectedGoalId);
+    const remaining = goal ? Math.max(goal.target - goal.current, 0) : 0;
     const amount = Number(customAmount);
     if (isNaN(amount) || amount <= 0) {
       Alert.alert('Error', 'La cantidad debe ser un número mayor a 0');
       return;
     }
+    if (remaining <= 0) {
+      Alert.alert('Meta completada', 'Esta meta ya está completada.');
+      return;
+    }
+    const useAmount = Math.min(amount, remaining);
 
     try {
-      await handleAddContribution(selectedGoalId, amount);
+      await handleAddContribution(selectedGoalId, useAmount);
       setCustomContributionModalVisible(false);
       setSelectedGoalId(null);
       setCustomAmount('');
@@ -327,7 +353,9 @@ export default function Goals() {
           <Ionicons name="arrow-back" size={20} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.title}>Mis Metas Financieras</Text>
-        <View style={{ width: 36 }} />
+        <TouchableOpacity style={[styles.backButton, { backgroundColor: '#1e293b' }]} onPress={() => setHistoryOpen(true)}>
+          <Ionicons name="time" size={18} color="#fff" />
+        </TouchableOpacity>
       </View>
       <ScrollView 
         contentContainerStyle={styles.content}
@@ -340,9 +368,18 @@ export default function Goals() {
           />
         }
       >
-        <Text style={styles.subtitle}>
-          Define, visualiza y sigue el progreso de tus objetivos.
-        </Text>
+        <View style={styles.motivCenter}>
+          {motivation ? (
+            <View>
+              <Text style={styles.motivQuote}>"{motivation.content}"</Text>
+              {motivation.author ? (
+                <Text style={styles.motivAuthor}>— {motivation.author}</Text>
+              ) : null}
+            </View>
+          ) : (
+            <Text style={styles.motivQuote}>Inicia sesión para ver tu frase del día.</Text>
+          )}
+        </View>
 
         {/* Formulario nueva meta */}
         <View style={styles.card}>
@@ -369,8 +406,8 @@ export default function Goals() {
           </TouchableOpacity>
         </View>
 
-        {/* Lista de metas */}
-        {goals.map((goal) => {
+        {/* Lista de metas (solo activas) */}
+        {activeGoals.map((goal) => {
           const progress = goal.target > 0 ? Math.min((goal.current / goal.target) * 100, 100) : 0;
           return (
             <View key={goal.id} style={styles.card}>
@@ -428,7 +465,7 @@ export default function Goals() {
           );
         })}
 
-        {!goals.length && !loading ? (
+        {!activeGoals.length && !loading ? (
           <Text style={{ color: '#cbd5e1', textAlign: 'center', marginTop: 16 }}>
             ¡Crea tu primera meta para empezar! ✨
           </Text>
@@ -528,6 +565,48 @@ export default function Goals() {
                 disabled={loading}
               >
                 <Text style={styles.modalButtonText}>Agregar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal Historial de metas completadas */}
+      <Modal
+        visible={historyOpen}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setHistoryOpen(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Historial de metas completadas</Text>
+            {completedGoals.length === 0 ? (
+              <Text style={{ color: '#cbd5e1', textAlign: 'center' }}>
+                Aún no has completado metas.
+              </Text>
+            ) : (
+              <ScrollView>
+                {completedGoals.map((g) => (
+                  <View key={g.id} style={[styles.card, { marginBottom: 12 }] }>
+                    <Text style={[styles.cardTitle, { marginBottom: 6 }]}>{g.title}</Text>
+                    <Text style={styles.cardText}>
+                      {CLP.format(g.current)} / {CLP.format(g.target)}
+                    </Text>
+                    <View style={styles.progressBar}>
+                      <View style={[styles.progressFill, { width: '100%' }]} />
+                    </View>
+                    <Text style={styles.progressText}>100% completado</Text>
+                  </View>
+                ))}
+              </ScrollView>
+            )}
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
+                onPress={() => setHistoryOpen(false)}
+              >
+                <Text style={styles.modalButtonText}>Cerrar</Text>
               </TouchableOpacity>
             </View>
           </View>

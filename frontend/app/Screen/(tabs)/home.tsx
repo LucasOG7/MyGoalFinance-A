@@ -111,7 +111,8 @@ export default function Home() {
       if (r.status === 'fulfilled') setRates(r.value as Rates);
       if (g.status === 'fulfilled') {
         const arr = (g.value as any[] | undefined) ?? [];
-        setGoals(arr.slice(0, 2).map(mapGoalUI)); // ← mostrar solo 2 metas en Home
+        const ui = arr.map(mapGoalUI).filter((x) => x.current < x.target);
+        setGoals(ui.slice(0, 2)); // ← mostrar solo 2 metas activas en Home
       }
       if (t.status === 'fulfilled') {
         const txs = (t.value as any[]) ?? [];

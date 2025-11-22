@@ -175,7 +175,7 @@ router.post('/:id/contribute', requireAuth, async (req: any, res) => {
 
   const { data: goal, error: eGoal } = await supabase
     .from('financial_goal')
-    .select('id,user_id,current_amount')
+    .select('id,user_id,current_amount,target_amount')
     .eq('id', id)
     .eq('user_id', userId)
     .single();
@@ -185,10 +185,20 @@ router.post('/:id/contribute', requireAuth, async (req: any, res) => {
     return res.status(404).json({ detail: 'Meta no encontrada' });
   }
 
+  const current = Number(goal.current_amount || 0);
+  const target  = Number(goal.target_amount || 0);
+  const remaining = Math.max(target - current, 0);
+
+  if (remaining <= 0) {
+    return res.status(400).json({ detail: 'Meta ya completada' });
+  }
+
+  const useAmount = Math.min(Number(amount), remaining);
+
   try {
     const { data, error } = await supabase.rpc('goal_contribute', {
       p_goal_id: id,
-      p_amount: amount,
+      p_amount: useAmount,
     });
     if (!error && data) return res.json(data);
     if (error) console.warn('[goals] RPC goal_contribute error (continuo con fallback)', error);
@@ -196,7 +206,7 @@ router.post('/:id/contribute', requireAuth, async (req: any, res) => {
     console.warn('[goals] RPC goal_contribute threw', e);
   }
 
-  const next = Number(goal.current_amount || 0) + amount;
+  const next = current + useAmount;
   const { data, error } = await supabase
     .from('financial_goal')
     .update({ current_amount: next })

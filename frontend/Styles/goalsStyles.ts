@@ -202,6 +202,32 @@ const goalsStyles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 15,
   },
+  motivCard: {
+    backgroundColor: "#1f2738",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "rgba(148,163,184,0.24)",
+  },
+  motivCenter: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 24,
+  },
+  motivQuote: {
+    fontSize: 16,
+    color: "#e2e8f0",
+    lineHeight: 22,
+    fontStyle: "italic",
+    textAlign: "center",
+  },
+  motivAuthor: {
+    fontSize: 14,
+    color: "#94a3b8",
+    marginTop: 8,
+    textAlign: "center",
+  },
 });
 
 export default goalsStyles;
