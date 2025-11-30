@@ -26,7 +26,8 @@ type ReqOpts = {
  * - En nativo hace fallback a una IP LAN por defecto (ajústala si quieres)
  */
 function resolveApiUrl(configUrl?: string) {
-  const extra = (Constants as any)?.expoConfig?.extra?.apiUrl;
+  const extra = (Constants as any)?.expoConfig?.extra?.apiUrl
+    || (Constants as any)?.expoConfig?.extra?.EXPO_PUBLIC_API_URL;
   const env   = process.env.EXPO_PUBLIC_API_URL;
 
   if (Platform.OS === 'web') {
@@ -47,7 +48,7 @@ function resolveApiUrl(configUrl?: string) {
 
   let url = configUrl && !/^undefined$/.test(configUrl) && configUrl.trim() !== ''
     ? configUrl
-    : (extra || env || 'http://192.168.1.102:3000');
+    : (extra || env || 'http://localhost:3000');
 
   // En producción exigir/advertir HTTPS; opcionalmente forzar si EXPO_PUBLIC_FORCE_HTTPS=1
   if (process.env.NODE_ENV === 'production' && String(url).startsWith('http://')) {
@@ -65,6 +66,22 @@ function resolveApiUrl(configUrl?: string) {
 
 // Base URL efectiva (sin romper tus exports actuales)
 const BASE_URL = resolveApiUrl(API_URL);
+
+function resolvePrefix(baseUrl: string, prefix: string) {
+  try {
+    const u = new URL(baseUrl);
+    const path = (u.pathname || '').replace(/\/+$/, '');
+    const isFunctions = u.hostname.includes('functions.supabase.co');
+    if (!isFunctions) return prefix;
+    if (path.endsWith('/functions/v1/api')) return '';
+    if (path.endsWith('/functions/v1')) return '/api';
+    return '/functions/v1/api';
+  } catch {
+    return prefix;
+  }
+}
+
+const BASE_PREFIX = resolvePrefix(BASE_URL, API_PREFIX);
 
 async function req<T>(
   path: string,
@@ -84,7 +101,7 @@ async function req<T>(
   }
 
   // ⬇️ ÚNICA línea cambiada: usar BASE_URL en vez de API_URL
-  const url = `${BASE_URL}${API_PREFIX}${path}`;
+  const url = `${BASE_URL}${BASE_PREFIX}${path}`;
 
   // Intento con reintentos controlados (solo red/timeout/5xx)
   let attempt = 0;
@@ -232,7 +249,7 @@ export const api = {
   logout: () =>
     req<{ ok: boolean }>(
       '/auth/logout',
-      { method: 'POST', auth: true }
+      { method: 'POST', auth: true, timeoutMs: 5000, retries: 0 }
     ),
 
   me: () => req<any>('/auth/me', { auth: true }),
@@ -303,7 +320,7 @@ export const api = {
   listContributions: (goalId: string) =>
     req<any[]>(`/goals/contributions/${goalId}`, { auth: true }),
   addContribution: (goalId: string, p: any) =>
-    req<{ id: string }>(`/goals/contributions/${goalId}`, {
+    req<{ id: string }>(`/goals/${goalId}/contribute`, {
       method: 'POST',
       body: p,
       auth: true,

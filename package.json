@@ -17,7 +17,9 @@
     "@types/multer": "^2.0.0",
     "cors": "^2.8.5",
     "cross-fetch": "^4.1.0",
+    "csv-parse": "^6.1.0",
     "dotenv": "^17.2.3",
+    "expo-document-picker": "~14.0.7",
     "expo-image-picker": "^17.0.8",
     "expo-server-sdk": "^4.0.0",
     "express": "^5.1.0",
@@ -29,6 +31,7 @@
     "node-cron": "^4.2.1",
     "openai": "^5.23.0",
     "rss-parser": "^3.13.0",
+    "xlsx": "^0.18.5",
     "zod": "^3.25.76"
   },
   "devDependencies": {
@@ -36,6 +39,7 @@
     "@types/express": "^5.0.3",
     "@types/luxon": "^3.7.1",
     "@types/node": "^24.7.2",
+    "@types/xlsx": "^0.0.35",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"

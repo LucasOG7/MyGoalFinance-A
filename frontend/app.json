@@ -8,11 +8,14 @@
     "scheme": "mygoalfinance",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kurtwelter.mygoalfinance",
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
-
     "android": {
       "useNextNotificationsApi": true,
       "adaptiveIcon": {
@@ -21,15 +24,15 @@
       },
       "edgeToEdgeEnabled": true,
       "softwareKeyboardLayoutMode": "resize",
-      "usesCleartextTraffic": true
+      "usesCleartextTraffic": true,
+      "package": "com.kurtwelter.MyGoalFinance",
+      "versionCode": 1
     },
-
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-
     "plugins": [
       "expo-router",
       [
@@ -45,16 +48,25 @@
       "expo-font",
       "expo-web-browser"
     ],
-
     "experiments": {
       "typedRoutes": true
     },
-
     "extra": {
-      "apiUrl": "http://192.168.1.102:3000",
+      "EXPO_PUBLIC_API_URL": "https://kxfxdcsrlcpwqmvxaauc.supabase.co/functions/v1",
+      "EXPO_PUBLIC_SUPABASE_URL": "https://kxfxdcsrlcpwqmvxaauc.supabase.co",
+      "EXPO_PUBLIC_API_PREFIX": "/api",
+      "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4ZnhkY3NybGNwd3FtdnhhYXVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MjM4OTIsImV4cCI6MjA3MzI5OTg5Mn0.N7wIkBLdMctuvtWEKaK1g8SBZKy4BcoH53e5A7v_twY",
+      "router": {},
       "eas": {
-        "projectId": "TU-PROJECT-ID-REAL"
+        "projectId": "16bbc975-ebf3-4853-9a0f-4c4fed873378"
       }
+    },
+    "owner": "kurtwelter",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/16bbc975-ebf3-4853-9a0f-4c4fed873378"
     }
   }
 }

@@ -22,7 +22,22 @@ Notifications.setNotificationHandler({
 // Helpers
 // ─────────────────────────────────────────────
 function getApiUrl() {
-  return (Constants?.expoConfig as any)?.extra?.apiUrl || process.env.EXPO_PUBLIC_API_URL;
+  const extra = (Constants?.expoConfig as any)?.extra?.apiUrl || (Constants?.expoConfig as any)?.extra?.EXPO_PUBLIC_API_URL;
+  return extra || process.env.EXPO_PUBLIC_API_URL;
+}
+
+function resolvePrefix(url: string) {
+  try {
+    const u = new URL(url);
+    const path = (u.pathname || '').replace(/\/+$/, '');
+    const isFunctions = u.hostname.includes('functions.supabase.co');
+    if (!isFunctions) return '/api';
+    if (path.endsWith('/functions/v1/api')) return '';
+    if (path.endsWith('/functions/v1')) return '/api';
+    return '/functions/v1/api';
+  } catch {
+    return '/api';
+  }
 }
 
 function getPlatform(): 'ios' | 'android' | 'web' {
@@ -79,9 +94,10 @@ export async function registerPushToken(authToken: string): Promise<string | nul
 
   const { data: expoToken } = await Notifications.getExpoPushTokenAsync({ projectId }); // "ExponentPushToken[...]"
   const apiUrl = getApiUrl();
+  const prefix = resolvePrefix(apiUrl);
 
   // 3) Enviar al backend protegido (requireAuth)
-  const resp = await fetch(`${apiUrl}/api/push/register`, {
+  const resp = await fetch(`${apiUrl}${prefix}/push/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -108,7 +124,8 @@ export const registerForPush = registerPushToken;
 export async function unregisterPushToken(authToken: string, token: string): Promise<void> {
   if (!authToken || !token) return;
   const apiUrl = getApiUrl();
-  await fetch(`${apiUrl}/api/push/unregister`, {
+  const prefix = resolvePrefix(apiUrl);
+  await fetch(`${apiUrl}${prefix}/push/unregister`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

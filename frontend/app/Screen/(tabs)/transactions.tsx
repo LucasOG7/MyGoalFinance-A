@@ -64,7 +64,7 @@ export default function Transactions() {
 
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [depositAmount, setDepositAmount] = useState('');
-  const [depositProvider, setDepositProvider] = useState<'mercadopago' | 'webpay'>('webpay');
+  
   const [creatingDeposit, setCreatingDeposit] = useState(false);
   const [depositState, setDepositState] = useState<{ status: 'idle' | 'pending' | 'approved' | 'failed'; amount?: number }>({ status: 'idle' });
 
@@ -73,11 +73,7 @@ export default function Transactions() {
   const [alloc, setAlloc] = useState<Record<string, string>>({});
   const [distributing, setDistributing] = useState(false);
 
-  // Form
-  const [tType, setTType] = useState<'income'|'expense'>('income');
-  const [amount, setAmount] = useState('');
-  const [desc, setDesc] = useState('');
-  const [showForm, setShowForm] = useState(false);
+  
 
   const ym = useMemo(() => ymOf(monthDate), [monthDate]);
 
@@ -132,27 +128,9 @@ export default function Transactions() {
     setMonthDate(d);
   };
 
-  const save = async () => {
-    const val = Number(amount.replace(/[^\d.-]/g, ''));
-    if (!val || val <= 0) return Alert.alert('Monto', 'Ingresa un monto válido');
-
-    try {
-      await api.createTransaction({
-        amount: val,
-        type: tType,
-        description: desc || undefined,
-        occurred_at: ymdLocal(), // SIEMPRE LOCAL (YYYY-MM-DD)
-      });
-      setAmount('');
-      setDesc('');
-      await load(); // refresca lista/KPIs
-    } catch (e: any) {
-      Alert.alert('Error', e?.message ?? 'No se pudo guardar');
-    }
-  };
+  
 
   const startDeposit = () => {
-    setDepositProvider('webpay');
     setDepositAmount('');
     setShowDepositModal(true);
   };
@@ -247,7 +225,7 @@ export default function Transactions() {
           <Text style={styles.actionLabel}>Depositar</Text>
         </View>
         <View style={styles.actionItem}>
-          <TouchableOpacity style={styles.actionIconWrap} onPress={() => setTType('expense') }>
+          <TouchableOpacity style={styles.actionIconWrap} onPress={() => Alert.alert('Retirar', 'Función no disponible por ahora') }>
             <Ionicons name="arrow-up" size={20} color={C.text} />
           </TouchableOpacity>
           <Text style={styles.actionLabel}>Retirar</Text>
@@ -289,7 +267,7 @@ export default function Transactions() {
         <FlatList
           data={list}
           keyExtractor={(t) => String(t.id)}
-          contentContainerStyle={{ paddingBottom: (Platform.OS === 'ios' ? insets.bottom : 0) + (showForm ? 240 : 80) }}
+          contentContainerStyle={{ paddingBottom: (Platform.OS === 'ios' ? insets.bottom : 0) + 80 }}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -379,47 +357,7 @@ export default function Transactions() {
         </TouchableOpacity>
       </Modal>
 
-      {showForm && (
-      <View style={[
-        styles.formCard,
-        { bottom: Platform.OS === 'ios' ? insets.bottom + -65 + 6 : 8 }
-      ] }>
-        <View style={styles.typeRow}>
-          <TouchableOpacity
-            onPress={() => setTType('income')}
-            style={[styles.typeBtn, tType === 'income' && styles.typeBtnActiveIncome]}
-          >
-            <Text style={[styles.typeBtnTxt, tType === 'income' && styles.typeBtnTxtActive]}>Ingreso</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setTType('expense')}
-            style={[styles.typeBtn, tType === 'expense' && styles.typeBtnActiveExpense]}
-          >
-            <Text style={[styles.typeBtnTxt, tType === 'expense' && styles.typeBtnTxtActive]}>Gasto</Text>
-          </TouchableOpacity>
-        </View>
-
-        <TextInput
-          style={styles.amountInput}
-          placeholder="Monto"
-          placeholderTextColor={C.muted}
-          keyboardType="numeric"
-          value={amount}
-          onChangeText={setAmount}
-        />
-        <TextInput
-          style={styles.descriptionInput}
-          placeholder="Descripción (opcional)"
-          placeholderTextColor={C.muted}
-          value={desc}
-          onChangeText={setDesc}
-        />
-
-        <TouchableOpacity style={styles.saveBtn} onPress={save}>
-          <Text style={styles.saveBtnTxt}>Guardar movimiento</Text>
-        </TouchableOpacity>
-      </View>
-      )}
+      
     </View>
     </SafeKeyboardScreen>
   );

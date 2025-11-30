@@ -21,7 +21,7 @@ import { useAuth } from '../../../store/auth';
 // API URL helper
 // ------------------------------
 function getApiUrl() {
-  const extra = (Constants as any)?.expoConfig?.extra?.apiUrl;
+  const extra = (Constants as any)?.expoConfig?.extra?.apiUrl || (Constants as any)?.expoConfig?.extra?.EXPO_PUBLIC_API_URL;
   const env = process.env.EXPO_PUBLIC_API_URL;
   const url = extra || env;
   if (!url) {
@@ -31,7 +31,20 @@ function getApiUrl() {
 }
 
 const API_URL = getApiUrl();
-const GOALS_URL = `${API_URL}/api/goals`;
+function resolvePrefix(url: string) {
+  try {
+    const u = new URL(url);
+    const path = (u.pathname || '').replace(/\/+$/, '');
+    const isFunctions = u.hostname.includes('functions.supabase.co');
+    if (!isFunctions) return '/api';
+    if (path.endsWith('/functions/v1/api')) return '';
+    if (path.endsWith('/functions/v1')) return '/api';
+    return '/functions/v1/api';
+  } catch {
+    return '/api';
+  }
+}
+const GOALS_URL = `${API_URL}${resolvePrefix(API_URL)}/goals`;
 console.log('[api] GOALS_URL =', GOALS_URL);
 
 // ------------------------------

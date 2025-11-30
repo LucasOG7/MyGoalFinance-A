@@ -296,23 +296,7 @@ const styles = StyleSheet.create({
   },
   chipText: { color: C.text, fontWeight: '700', fontSize: 12 },
 
-  statusBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
-    borderWidth: 1,
-    marginBottom: 8,
-  },
-  statusBadgePending: {
-    backgroundColor: C.primarySoft,
-    borderColor: C.primary,
-  },
-  statusBadgeApproved: {
-    backgroundColor: C.incomeBg,
-    borderColor: C.income,
-  },
-  statusBadgeText: { color: C.text, fontWeight: '700', fontSize: 12 },
+  
 });
 
 export default styles;

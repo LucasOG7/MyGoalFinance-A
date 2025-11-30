@@ -18,8 +18,12 @@ function resolveDevApiBase() {
   return Platform.OS === 'android' ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
 }
 
-export const API_URL =
-  process.env.EXPO_PUBLIC_API_URL ?? resolveDevApiBase();
+const extraApiUrl = (Constants as any)?.expoConfig?.extra?.apiUrl
+  || (Constants as any)?.expoConfig?.extra?.EXPO_PUBLIC_API_URL;
 
+export const API_URL =
+  extraApiUrl ?? process.env.EXPO_PUBLIC_API_URL ?? resolveDevApiBase();
+
+const extraPrefix = (Constants as any)?.expoConfig?.extra?.EXPO_PUBLIC_API_PREFIX;
 export const API_PREFIX =
-  process.env.EXPO_PUBLIC_API_PREFIX ?? '/api';
+  extraPrefix ?? process.env.EXPO_PUBLIC_API_PREFIX ?? '/api';
