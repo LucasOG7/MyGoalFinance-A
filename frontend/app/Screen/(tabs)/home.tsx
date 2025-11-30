@@ -18,7 +18,10 @@ import {
   View,
   Animated,
   Dimensions,
-  Easing
+  Easing,
+  Modal,
+  TextInput,
+  Alert,
 } from 'react-native';
 import type { ColorValue } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -79,6 +82,9 @@ export default function Home() {
   const [actionsOpen, setActionsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Array<{ id: string; title: string; body?: string }>>([]);
   const [headerH, setHeaderH] = useState(0);
+  const [showBalanceModal, setShowBalanceModal] = useState(false);
+  const [alloc, setAlloc] = useState<Record<string, string>>({});
+  const [distributing, setDistributing] = useState(false);
 
   const firstName = useMemo(() => {
     const n = profile?.name || '';
@@ -228,10 +234,40 @@ export default function Home() {
         ]}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
+        {/* Saldo disponible */}
+        <View style={styles.balanceWrap}>
+          <Text style={styles.balanceTitle}>Saldo</Text>
+          <Text style={styles.balanceValue}>{formatCLP(sum?.net ?? 0)}</Text>
+        </View>
+        <View style={styles.balanceActionsCard}>
+          <View style={styles.balanceActionsRow}>
+            <TouchableOpacity
+              style={styles.balanceActionBtn}
+              onPress={() => {
+                const init: Record<string, string> = {};
+                goals.forEach((g) => { init[g.id] = ''; });
+                setAlloc(init);
+                setShowBalanceModal(true);
+              }}
+            >
+              <Ionicons name="pie-chart" size={18} color="#1f2738" />
+              <Text style={styles.balanceActionTxt}>Distribuir saldo</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.balanceActionBtn, styles.balanceActionBtnAlt]}
+              onPress={() => router.push('/Screen/(tabs)/transactions')}
+            >
+              <Ionicons name="arrow-down-circle" size={18} color="#1f2738" />
+              <Text style={styles.balanceActionTxt}>Depósito</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* KPIs (primero visible) */}
         <View style={styles.row}>
           <KpiCard label="Ingresos" value={sum?.inc ?? 0} color="#26c281" icon="arrow-up-circle" />
-          <KpiCard label="Gastos" value={sum?.exp ?? 0} color="#ff5a5f" icon="arrow-down-circle" />
+          <KpiCard label="Retiros" value={sum?.exp ?? 0} color="#ff5a5f" icon="arrow-down-circle" />
           <KpiCard label="Neto" value={sum?.net ?? 0} color="#4dabf7" icon="wallet" />
         </View>
 
@@ -336,6 +372,60 @@ export default function Home() {
 
         {/* Bottom padding para tabs */}
         <View style={{ height: 24 }} />
+        {/* Modal distribuir saldo */}
+        <Modal transparent visible={showBalanceModal} animationType="fade" onRequestClose={() => setShowBalanceModal(false)}>
+          <TouchableOpacity activeOpacity={1} onPress={() => setShowBalanceModal(false)} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 }}>
+            <View style={{ backgroundColor: '#1f2738', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#2a3441', maxHeight: '80%' }}>
+              <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700', textAlign: 'center' }}>Distribuir saldo</Text>
+              <Text style={{ color: '#cbd5e1', textAlign: 'center', marginTop: 4 }}>Disponible: {formatCLP(sum?.net ?? 0)}</Text>
+              <ScrollView style={{ marginTop: 10 }}>
+                {goals.length === 0 ? (
+                  <Text style={{ color: '#94a3b8', textAlign: 'center' }}>No hay metas activas</Text>
+                ) : (
+                  goals.map((g) => (
+                    <View key={g.id} style={{ marginBottom: 10 }}>
+                      <Text style={{ color: '#e2e8f0', marginBottom: 6 }}>{g.title}</Text>
+                      <TextInput
+                        style={{ backgroundColor: '#243044', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8, color: '#fff', borderWidth: 1, borderColor: '#334155' }}
+                        placeholder="Monto"
+                        placeholderTextColor="#94a3b8"
+                        keyboardType="numeric"
+                        value={alloc[g.id] || ''}
+                        onChangeText={(txt) => setAlloc((m) => ({ ...m, [g.id]: txt }))}
+                      />
+                    </View>
+                  ))
+                )}
+              </ScrollView>
+              <TouchableOpacity disabled={distributing} onPress={async () => {
+                const available = Number(sum?.net ?? 0);
+                const total = Object.values(alloc).reduce((s, v) => s + (Number((v || '').replace(/[^\d.-]/g, '')) || 0), 0);
+                if (total <= 0) return Alert.alert('Distribución', 'Ingresa montos a distribuir');
+                if (total > available) return Alert.alert('Distribución', 'El total supera el saldo disponible');
+                setDistributing(true);
+                try {
+                  for (const g of goals) {
+                    const amt = Number((alloc[g.id] || '').replace(/[^\d.-]/g, ''));
+                    if (amt && amt > 0) {
+                      await api.addContribution(g.id, { amount: amt });
+                    }
+                  }
+                  setShowBalanceModal(false);
+                  setAlloc({});
+                  Alert.alert('Distribución', 'Se registraron los aportes en tus metas');
+                  load();
+                } catch (e: any) {
+                  Alert.alert('Error', e?.message || 'No se pudo distribuir');
+                } finally {
+                  setDistributing(false);
+                }
+              }} style={{ backgroundColor: '#f59e0b', borderRadius: 12, alignItems: 'center', paddingVertical: 12, marginTop: 8, opacity: distributing ? 0.8 : 1 }}>
+                {distributing ? <ActivityIndicator color="#1f2937" /> : <Text style={{ color: '#1f2937', fontWeight: '800' }}>Distribuir</Text>}
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+
       </ScrollView>
     </SafeAreaView>
   );

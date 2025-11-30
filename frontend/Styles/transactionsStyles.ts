@@ -47,11 +47,11 @@ const styles = StyleSheet.create({
   },
   
   mainTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#ffffff',
-    textAlign: 'center',
-    marginBottom: 16,
+    textAlign: 'left',
+    marginBottom: 24,
     marginTop: 8,
   },
 
@@ -84,6 +84,43 @@ const styles = StyleSheet.create({
   },
   kpiLabel: { color: C.kpiLabel, fontSize: 12 },
   kpiValue: { color: C.kpiValue, fontWeight: '800', marginTop: 2 },
+
+  actionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+    paddingHorizontal: 6,
+  },
+  actionItem: {
+    width: 72,
+    alignItems: 'center',
+  },
+  actionIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: C.inputBg,
+    borderWidth: 1,
+    borderColor: C.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  actionLabel: {
+    color: C.text,
+    fontSize: 11,
+    textAlign: 'center',
+  },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  sectionTitle: { color: C.text, fontSize: 15, fontWeight: '700' },
+  sectionLink: { color: C.primary, fontSize: 12, fontWeight: '700' },
 
   list: { 
     flex: 1, 
@@ -210,6 +247,72 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   saveBtnTxt: { color: C.actionText, fontWeight: '800' },
+
+  modalCard: {
+    backgroundColor: C.card,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: C.border,
+  },
+  modalTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  modalTitle: { color: C.text, fontSize: 18, fontWeight: '700' },
+  modalSubtitle: { color: C.textDim, fontSize: 12 },
+  moneyInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: C.inputBg,
+    borderWidth: 1.5,
+    borderColor: C.inputBorder,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: Platform.select({ ios: 14, android: 12 }),
+  },
+  currencyPrefix: { color: C.textDim, fontWeight: '700', marginRight: 8 },
+  quickChipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: C.inputBg,
+    borderWidth: 1,
+    borderColor: C.border,
+  },
+  chipActive: {
+    backgroundColor: C.primarySoft,
+    borderColor: C.primary,
+  },
+  chipText: { color: C.text, fontWeight: '700', fontSize: 12 },
+
+  statusBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    marginBottom: 8,
+  },
+  statusBadgePending: {
+    backgroundColor: C.primarySoft,
+    borderColor: C.primary,
+  },
+  statusBadgeApproved: {
+    backgroundColor: C.incomeBg,
+    borderColor: C.income,
+  },
+  statusBadgeText: { color: C.text, fontWeight: '700', fontSize: 12 },
 });
 
 export default styles;

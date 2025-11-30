@@ -13,6 +13,7 @@ import recommendationsRoutes from './routes/recommendations';
 import chatRoutes from './routes/chat';
 import newsRoutes from './routes/news';
 import pushRoutes from './routes/push';
+import paymentsRoutes from './routes/payments';
 import { startNewsAndRatesPolling } from './jobs/newsPoller';
 
 const app = express();
@@ -104,8 +105,9 @@ app.use('/api/recommendations', recommendationsRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/push', pushRoutes);
+app.use('/api/payments', paymentsRoutes);
 
-// 👇 IMPORTANTE: escuchar en 0.0.0.0 para que el teléfono pueda conectarse por la IP LAN
+// Escuchar en 0.0.0.0 para que el teléfono pueda conectarse por la IP LAN
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 API lista en http://0.0.0.0:${PORT}`);
 

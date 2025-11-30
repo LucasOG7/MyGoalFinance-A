@@ -49,9 +49,9 @@ const styles = StyleSheet.create({
 
   // Dashboard Card Styles (similar to reference image)
   dashboardCard: {
-    backgroundColor: '#0f172a99',
-    borderRadius: 16,
-    padding: 20,
+    backgroundColor: 'transparent',
+    borderRadius: 22,
+    padding: 16,
     position: 'relative',
   },
   dashboardLabel: {
@@ -108,20 +108,52 @@ const styles = StyleSheet.create({
   content: { padding: 16, paddingTop: 8, gap: 16 },
 
   row: { flexDirection: 'row', gap: 12 },
+  balanceWrap: { alignItems: 'center', marginBottom: 8 },
+  balanceTitle: { color: '#f59e0b', fontSize: 18, fontWeight: '800' },
+  balanceValue: { color: 'white', fontSize: 36, fontWeight: '800', marginTop: 4 },
+  balanceActionsCard: {
+    backgroundColor: '#1f2738',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#2a3441',
+    padding: 14,
+    alignItems: 'center',
+    gap: 10,
+  },
+  balanceActionsRow: { flexDirection: 'row', gap: 12 },
+  balanceActionBtn: {
+    flex: 1,
+    backgroundColor: '#f59e0b',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    shadowColor: '#f59e0b',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  balanceActionBtnAlt: {
+    backgroundColor: '#4dabf7',
+    shadowColor: '#4dabf7',
+  },
+  balanceActionTxt: { color: '#1f2738', fontWeight: '800', fontSize: 12, textAlign: 'center' },
   kpi: {
     flex: 1,
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    padding: 12,
-    overflow: 'hidden', // el gradiente respeta los bordes redondeados
+    backgroundColor: 'transparent',
+    borderRadius: 22,
+    padding: 10,
+    overflow: 'hidden',
   },
-  kpiIconWrap: { width: 28, height: 28, borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
+  kpiIconWrap: { width: 28, height: 28, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
   kpiLabel: { color: '#aab4c6' },
-  kpiValue: { fontSize: 18, fontWeight: '800', marginTop: 2 },
+  kpiValue: { fontSize: 17, fontWeight: '800', marginTop: 2 },
 
-  rate: { flex: 1, backgroundColor: '#1f2738', borderRadius: 16, padding: 12 },
+  rate: { flex: 1, backgroundColor: 'transparent', borderRadius: 22, padding: 10 },
   rateTitle: { color: '#f59e0b', fontWeight: '700' },
-  rateValue: { color: 'white', fontWeight: '800', fontSize: 18, marginTop: 4 },
+  rateValue: { color: 'white', fontWeight: '800', fontSize: 17, marginTop: 4 },
   rateHint: { color: '#92a0ba', marginTop: 2 },
 
   quickRow: { flexDirection: 'row', gap: 12 },
@@ -157,11 +189,11 @@ const styles = StyleSheet.create({
   sectionTitle: { color: 'white', fontSize: 18, fontWeight: '800' },
   sectionAction: { color: '#f3b34c', fontWeight: '700' },
 
-  tile: { backgroundColor: '#1f2738', borderRadius: 14, padding: 14, marginBottom: 10 },
+  tile: { backgroundColor: 'transparent', borderRadius: 20, padding: 12, marginBottom: 10 },
   tileTitle: { color: '#e8edf7', fontWeight: '700' },
   tileSubtitle: { color: '#9aa7bf', marginTop: 2 },
 
-  newsItem: { backgroundColor: '#1f2738', borderRadius: 14, padding: 14, marginBottom: 10 },
+  newsItem: { backgroundColor: 'transparent', borderRadius: 20, padding: 12, marginBottom: 10 },
   newsTitle: { color: '#e8edf7', fontWeight: '700' },
   newsMeta: { color: '#9aa7bf', marginTop: 4 },
   newsLink: { color: '#f3b34c', marginTop: 6, fontWeight: '700' },

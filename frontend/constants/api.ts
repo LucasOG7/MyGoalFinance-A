@@ -348,6 +348,13 @@ export const api = {
 
   /** Feed de noticias financieras */
   newsFeed: () => req<Article[]>('/news/feed', { auth: true }),
+
+  // ─────────────── PAYMENTS ───────────────
+  createDeposit: (p: { amount: number; provider: 'mercadopago' | 'webpay'; return_url?: string }) =>
+    req<{ provider: string; deposit_id: string; preference_id?: string; payment_url?: string; sandbox_url?: string }>(
+      '/payments/deposit',
+      { method: 'POST', body: p, auth: true }
+    ),
 };
 
 export default api;
